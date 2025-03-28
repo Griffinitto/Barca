@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcelona Attractions Map</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #map-container {
+            flex: 1;
+            height: 100%;
+        }
+        
+        #right-sidebar {
+            width: 25%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: #f5f5f5;
+            padding: 10px;
+            box-sizing: border-box;
+            border-left: 1px solid #ddd;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .location-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 4px;
+            border-left: 5px solid #ddd;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .location-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .location-name {
+            font-weight: bold;
+            margin-bottom: 5px; /* Fixed syntax error */
+        }
+        
+        .location-category {
+            font-size: 0.8em;
+            color: #666;
+        }
+        
+        .header {
+            background-color: #4a66a0;
+            color: white;
+            padding: 10px;
+            margin: -10px -10px 10px -10px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .info-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .info-category {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #eee;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+        
+        .info-description {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .info-detail {
+            margin-bottom: 8px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .info-links a {
+            display: inline-block;
+            margin-right: 10px;
+            color: #4a66a0;
+            text-decoration: none;
+        }
+        
+        .info-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .no-selection {
+            display: flex;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .legend {
+            padding: 6px 8px;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            line-height: 24px;
+            color: #555;
+        }
+        
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin: 0 8px 0 0;
+            opacity: 0.7;
+        }
+        
+        .legend-item {
+            margin-bottom: 5px;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 767px) {
+            #right-sidebar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 30vh;
+                overflow-y: auto;
+                z-index: 1000;
+                border-top: 1px solid #ddd;
+                border-left: none;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            }
+            
+            #map-container {
+                height: 100vh;
+                width: 100%;
+            }
+            
+            .info-name {
+                font-size: 1.2em;
+            }
+            
+            .info-detail {
+                margin-bottom: 5px;
+            }
+            
+            .header {
+                padding: 8px;
+                margin: -10px -10px 5px -10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+    
+    <div id="right-sidebar">
+        <div class="header">Attraction Details</div>
+        <div id="location-info">
+            <div class="no-selection">
+                Select a location on the map to see its details
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script>
+        // Define category colors and icons
+        const categoryConfig = {
+            "Art": { color: "#FF5733", icon: "🎨" },
+            "Historical": { color: "#C70039", icon: "🏛️" },
+            "Entertainment": { color: "#900C3F", icon: "🎭" },
+            "Unique Places": { color: "#581845", icon: "🌟" },
+            "Nature": { color: "#2ECC71", icon: "🌳" },
+            "Amusement Park": { color: "#3498DB", icon: "🎢" },
+            "Nightlife": { color: "#8E44AD", icon: "🍸" }
+        };
+
+        // Initialize map
+        const map = L.map('map').setView([41.3851, 2.1734], 13);
+        
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Dynamic legend position
+        const legendPosition = window.innerWidth <= 767 ? 'topright' : 'bottomright';
+        const legend = L.control({ position: legendPosition });
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <div class="legend-item"><i style="background: #FF5733"></i> Art</div>
+                <div class="legend-item"><i style="background: #C70039"></i> Historical</div>
+                <div class="legend-item"><i style="background: #900C3F"></i> Entertainment</div>
+                <div class="legend-item"><i style="background: #581845"></i> Unique Places</div>
+                <div class="legend-item"><i style="background: #2ECC71"></i> Nature</div>
+                <div class="legend-item"><i style="background: #3498DB"></i> Amusement Park</div>
+                <div class="legend-item"><i style="background: #8E44AD"></i> Nightlife</div>
+            `;
+            return div;
+        };
+        legend.addTo(map);
+
+        // Load attraction data
+        const attractions = [
+        {
+      "name": "Sagrada Familia",
+      "category": "Art",
+      "description": "The Basílica i Temple Expiatori de la Sagrada Família, designed by Antoni Gaudí, is the largest unfinished Catholic church globally, with construction starting on March 19, 1882, and expected completion by 2026. It features a capacity of 9,000, a length of 90 m (300 ft), width of 60 m (200 ft), and a planned spire height of 172.5 m (570 ft), with 13 of 18 spires already built as of 2023.",
+      "coordinates": {
+        "latitude": 41.40369,
+        "longitude": 2.17445
+      },
+      "address": "Carrer de Mallorca, 401, 08013 Barcelona, Spain",
+      "openingHours": "Typically from 9:00 AM to 6:00 PM, subject to change; check official website for updates.",
+      "admissionFee": "€26 (basic ticket); book your ticket at https://example.com/sagrada-familia-tickets",
+      "bestTimeToVisit": "Early morning or late afternoon to avoid crowds, especially given its popularity with over 3 million annual visitors.",
+      "durationOfVisit": "Recommended 2-3 hours to explore the interiors and museum.",
+      "rating": "4.7 out of 5, based on 129,992 reviews on TripAdvisor as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Sagrada_Familia",
+      "youTube": "https://youtube.com/example-sagrada-familia-tour",
+      "audioGuide": "Available via the official Sagrada Familia app, in 19 languages, with standard (45 minutes) and express (25 minutes) versions.",
+      "tourBooking": "Book guided tours with skip-the-line access at https://viator.com/sagrada-familia-tours"
+    },
+    {
+      "name": "Park Guell",
+      "category": "Art",
+      "description": "A public park system designed by Antoni Gaudí, featuring gardens and architectonic elements, built between 1900 and 1914, and opened to the public in 1926. It spans 17.18 hectares and was declared a UNESCO World Heritage Site in 1984.",
+      "coordinates": {
+        "latitude": 41.422,
+        "longitude": 2.1552
+      },
+      "address": "Carrer d'Olot, 7, 08024 Barcelona, Spain",
+      "openingHours": "Typically 8:00 AM to 9:00 PM; check official website for updates.",
+      "admissionFee": "Varies; book tickets at https://example.com/park-guell-tickets",
+      "bestTimeToVisit": "Early morning or late afternoon to enjoy the views and avoid peak crowds.",
+      "durationOfVisit": "Recommended 1-2 hours to explore the main areas and Gaudí House Museum.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Park_Guell",
+      "youTube": "https://youtube.com/example-park-guell-tour",
+      "audioGuide": "Available via the official Park Guell app or during guided tours.",
+      "tourBooking": "Book tours at https://getyourguide.com/park-guell-tours"
+    },
+    {
+      "name": "Camp Nou Stadium",
+      "category": "Entertainment",
+      "description": "Home of FC Barcelona, this stadium seats 99,354 and offers guided tours including the museum, dressing rooms, and pitch, making it a pilgrimage site for football fans.",
+      "coordinates": {
+        "latitude": 41.38299,
+        "longitude": 2.12222
+      },
+      "address": "Carrer d'Aristides Maillol, 12, 08028 Barcelona, Spain",
+      "openingHours": "Varies; check official website for tour schedules.",
+      "admissionFee": "Varies; book at https://example.com/camp-nou-tickets",
+      "bestTimeToVisit": "During non-match days for a quieter tour experience.",
+      "durationOfVisit": "Approximately 1 hour for the standard tour.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Camp_Nou",
+      "youTube": "https://youtube.com/example-camp-nou-tour",
+      "audioGuide": "Included in guided tours.",
+      "tourBooking": "Book at https://fcbarcelona.com/tours"
+    },
+    {
+      "name": "Casa Batlló",
+      "category": "Art",
+      "description": "Designed by Gaudí, this residential building features a marine-inspired facade and was built between 1904 and 1906, a UNESCO site known for its fairy-tale appearance.",
+      "coordinates": {
+        "latitude": 41.3917,
+        "longitude": 2.16503
+      },
+      "address": "Passeig de Gràcia, 43, 08007 Barcelona, Spain",
+      "openingHours": "Typically 9:00 AM to 9:00 PM; check official website for updates.",
+      "admissionFee": "€29; book at https://example.com/casa-batllo-tickets",
+      "bestTimeToVisit": "Early morning or late afternoon to avoid crowds.",
+      "durationOfVisit": "Approximately 1 hour.",
+      "rating": "4.7 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Casa_Batlló",
+      "youTube": "https://youtube.com/example-casa-batllo-tour",
+      "audioGuide": "Available via official app or during visit.",
+      "tourBooking": "Book at https://example.com/casa-batllo-tours"
+    },
+    {
+      "name": "La Pedrera (Casa Milà)",
+      "category": "Art",
+      "description": "Another Gaudí masterpiece, built 1905-1910, known for its stone facade and rooftop sculptures, a UNESCO site.",
+      "coordinates": {
+        "latitude": 41.39507,
+        "longitude": 2.16200
+      },
+      "address": "Passeig de Gràcia, 92, 08008 Barcelona, Spain",
+      "openingHours": "Typically 9:00 AM to 8:00 PM; check official website for updates.",
+      "admissionFee": "Varies; book at https://example.com/la-pedrera-tickets",
+      "bestTimeToVisit": "Early morning or late afternoon.",
+      "durationOfVisit": "Approximately 1 hour.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/La_Pedrera",
+      "youTube": "https://youtube.com/example-la-pedrera-tour",
+      "audioGuide": "Available via official app or during visit.",
+      "tourBooking": "Book at https://example.com/la-pedrera-tours"
+    },
+    {
+      "name": "Picasso Museum",
+      "category": "Art",
+      "description": "Houses over 4,000 works by Pablo Picasso, located in five Gothic palaces in El Born, focusing on his early career.",
+      "coordinates": {
+        "latitude": 41.3839,
+        "longitude": 2.1814
+      },
+      "address": "Carrer de Montcada, 15-23, 08003 Barcelona, Spain",
+      "openingHours": "Typically 9:00 AM to 7:00 PM; check official website for updates.",
+      "admissionFee": "Varies; book at https://example.com/picasso-museum-tickets",
+      "bestTimeToVisit": "Early morning or late afternoon.",
+      "durationOfVisit": "Approximately 1-2 hours.",
+      "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Picasso_Museum,_Barcelona",
+      "youTube": "https://youtube.com/example-picasso-museum-tour",
+      "audioGuide": "Available via official app or during visit.",
+      "tourBooking": "Book at https://example.com/picasso-museum-tours"
+    },
+    {
+      "name": "Barcelona Cathedral",
+      "category": "Historical",
+      "description": "A Gothic cathedral dedicated to the Holy Cross and Saint Eulalia, with a cloister featuring 13 geese, built in the 13th-15th centuries.",
+      "coordinates": {
+        "latitude": 41.383333,
+        "longitude": 2.178333
+      },
+      "address": "Plaça de la Catedral, s/n, 08002 Barcelona, Spain",
+      "openingHours": "Typically 8:00 AM to 7:00 PM; check official website for updates.",
+      "admissionFee": "Free, donations welcome.",
+      "bestTimeToVisit": "Early morning or late afternoon.",
+      "durationOfVisit": "Approximately 1 hour.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Barcelona_Cathedral",
+      "youTube": "https://youtube.com/example-barcelona-cathedral-tour",
+      "audioGuide": "Available via various apps or websites.",
+      "tourBooking": "Book guided tours at https://example.com/barcelona-cathedral-tours"
+    },
+    {
+      "name": "Palau de la Musica Catalana",
+      "category": "Historical",
+      "description": "A Modernist concert hall, UNESCO-listed, opened in 1908, seating 2,200, known for its stained glass and mosaics.",
+      "coordinates": {
+        "latitude": 41.3856,
+        "longitude": 2.1764
+      },
+      "address": "Carrer de Sant Pere Més Alt, 11, 08002 Barcelona, Spain",
+      "openingHours": "Varies; check official website for concert and tour schedules.",
+      "admissionFee": "Varies for concerts and tours.",
+      "bestTimeToVisit": "During guided tours or concerts.",
+      "durationOfVisit": "Approximately 1 hour for tours.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Palau_de_la_Musica_Catalana",
+      "youTube": "https://youtube.com/example-palau-musica-tour",
+      "audioGuide": "Available during tours.",
+      "tourBooking": "Book at https://example.com/palau-musica-tours"
+    },
+    {
+      "name": "La Rambla",
+      "category": "Unique Places",
+      "description": "A tree-lined pedestrian boulevard, known for flower stalls, street performers, and historic buildings like the Liceu Theater, always bustling with activity.",
+      "coordinates": {
+        "latitude": 41.385,
+        "longitude": 2.176667
+      },
+      "address": "La Rambla, Barcelona, Spain",
+      "openingHours": "Always open.",
+      "admissionFee": "Free.",
+      "bestTimeToVisit": "Late afternoon or evening for the vibrant atmosphere.",
+      "durationOfVisit": "Variable, depending on exploration.",
+      "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/La_Rambla,_Barcelona",
+      "youTube": "https://youtube.com/example-la-rambla-tour",
+      "audioGuide": "Available via various apps or websites.",
+      "tourBooking": "Book guided walks at https://getyourguide.com/la-rambla-tours"
+    },
+    {
+      "name": "Boqueria Market",
+      "category": "Historical",
+      "description": "A central fresh-produce market since 1836, housed in a Modernist building, offering a sensory experience with its colors, smells, and sounds.",
+      "coordinates": {
+        "latitude": 41.3839,
+        "longitude": 2.1733
+      },
+      "address": "La Rambla, 91, 08001 Barcelona, Spain",
+      "openingHours": "Typically 8:00 AM to 8:30 PM; check official website for updates.",
+      "admissionFee": "Free.",
+      "bestTimeToVisit": "Early morning for the freshest produce.",
+      "durationOfVisit": "Approximately 1 hour.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Boqueria_Market",
+      "youTube": "https://youtube.com/example-boqueria-market-tour",
+      "audioGuide": "Available via various apps or websites.",
+      "tourBooking": "Book market tours at https://getyourguide.com/boqueria-market-tours"
+    },
+    {
+      "name": "Magic Fountain of Montjuïc",
+      "category": "Entertainment",
+      "description": "An Art Deco fountain built for the 1929 World Exhibition, known for its light and music shows, held Thursday to Sunday in summer and Friday to Saturday off-season.",
+      "coordinates": {
+        "latitude": 41.372222,
+        "longitude": 2.151389
+      },
+      "address": "Avinguda de la Reina Maria Cristina, s/n, 08004 Barcelona, Spain",
+      "openingHours": "Evening shows; check official website for schedule.",
+      "admissionFee": "Free.",
+      "bestTimeToVisit": "During scheduled shows for the full experience.",
+      "durationOfVisit": "Approximately 30 minutes per show.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Magic_Fountain_of_Montjuïc",
+      "youTube": "https://youtube.com/example-magic-fountain-show"
+    },
+    {
+      "name": "MNAC (Museu Nacional d'Art de Catalunya)",
+      "category": "Art",
+      "description": "Located in the Palau Nacional, built for the 1929 World Exhibition, it houses an exceptional collection of Catalan art from the 10th to 20th centuries, including European Renaissance and Baroque art.",
+      "coordinates": {
+        "latitude": 41.366533,
+        "longitude": 2.155
+      },
+      "address": "Carrer del Mirador del Palau Nacional, s/n, 08038 Barcelona, Spain",
+      "openingHours": "Typically 10:00 AM to 6:00 PM; check official website for updates.",
+      "admissionFee": "€12; book at https://example.com/mnac-tickets",
+      "bestTimeToVisit": "Midweek mornings for fewer crowds.",
+      "durationOfVisit": "2-3 hours.",
+      "rating": "4.6 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Museu_Nacional_d'Art_de_Catalunya",
+      "youTube": "https://youtube.com/example-mnac-tour",
+      "audioGuide": "Available during guided tours.",
+      "tourBooking": "Book at https://example.com/mnac-tours"
+    },
+    {
+      "name": "Poble Espanyo",
+      "category": "Unique Places",
+      "description": "A village representing different regions of Spain, built for the 1929 World Fair, with traditional architecture and shops.",
+      "coordinates": {
+        "latitude": 41.3672,
+        "longitude": 2.1594
+      },
+      "address": "Avinguda de la Reina Maria Cristina, s/n, 08004 Barcelona, Spain",
+      "openingHours": "10:00 AM - 8:00 PM; check official website for updates.",
+      "admissionFee": "Varies; book at https://example.com/poble-espanyo-tickets",
+      "bestTimeToVisit": "Late afternoon for fewer crowds.",
+      "durationOfVisit": "1-2 hours.",
+      "rating": "4.0 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Poble_Espanyo",
+      "youTube": "https://youtube.com/example-poble-espanyo-tour",
+      "audioGuide": "Available during guided tours.",
+      "tourBooking": "Book at https://example.com/poble-espanyo-tours"
+    },
+    {
+      "name": "Santa Maria del Mar",
+      "category": "Historical",
+      "description": "A beautiful Gothic church in El Born, ideal for history enthusiasts, built between 1329 and 1383.",
+      "coordinates": {
+        "latitude": 41.3861,
+        "longitude": 2.1842
+      },
+      "address": "Plaça de Santa Maria, 1, 08003 Barcelona, Spain",
+      "openingHours": "9:00 AM - 6:00 PM; check official website for updates.",
+      "admissionFee": "Free, donations welcome.",
+      "bestTimeToVisit": "Early morning or late afternoon to avoid crowds.",
+      "durationOfVisit": "Approximately 1 hour.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Santa_Maria_del_Mar",
+      "youTube": "https://youtube.com/example-santa-maria-del-mar-tour"
+    },
+    {
+      "name": "Fundacio Joan Mirò",
+      "category": "Art",
+      "description": "Dedicated to the artist Joan Mirò, with abstract and surrealist works, housed in a building designed by Josep Lluís Sert.",
+      "coordinates": {
+        "latitude": 41.3722,
+        "longitude": 2.1594
+      },
+      "address": "Carrer de Montjuïc, 17-21, 08038 Barcelona, Spain",
+      "openingHours": "10:00 AM - 6:00 PM (closed Mondays); check official website for updates.",
+      "admissionFee": "Varies; book at https://example.com/fundacio-joan-miro-tickets",
+      "bestTimeToVisit": "Morning, midweek for fewer crowds.",
+      "durationOfVisit": "1-2 hours.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Fundacio_Joan_Mirò",
+      "youTube": "https://youtube.com/example-fundacio-joan-miro-tour",
+      "audioGuide": "Available during guided tours or via the official app.",
+      "tourBooking": "Book at https://example.com/fundacio-joan-miro-tours"
+    },
+    {
+      "name": "Parc de la Ciutadella",
+      "category": "Nature",
+      "description": "A large urban park with a lake, zoo, and the Catalan Parliament, ideal for relaxation and recreation.",
+      "coordinates": {
+        "latitude": 41.3800,
+        "longitude": 2.1850
+      },
+      "address": "Passeig de Pujades, s/n, 08003 Barcelona, Spain",
+      "openingHours": "10:00 AM - 10:00 PM; check official website for updates.",
+      "admissionFee": "Free entry.",
+      "bestTimeToVisit": "Any daylight hours, preferably morning or late afternoon to avoid peak crowds.",
+      "durationOfVisit": "Variable, depending on exploration.",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_la_Ciutadella",
+      "youTube": "https://youtube.com/example-parc-ciutadella-tour"
+    },
+    {
+      "name": "Tibidabo Mountain",
+      "category": "Amusement Park",
+      "description": "A historic amusement park atop Mount Tibidabo with rides, stunning views, and a unique retro charm.",
+      "coordinates": {
+        "latitude": 41.4167,
+        "longitude": 2.1167
+      },
+      "address": "Plaça del Tibidabo, 3-4, 08035 Barcelona, Spain",
+      "openingHours": "Varies by season; check official website for updates.",
+      "admissionFee": "€35 (full access); book at https://example.com/tibidabo-tickets",
+      "bestTimeToVisit": "Weekdays to avoid crowds, spring or autumn for pleasant weather.",
+      "durationOfVisit": "Variable, depending on the number of rides and activities chosen.",
+      "rating": "4.0 out of 5, based on TripAdvisor reviews as of March 2025.",
+      "wikipedia": "https://en.wikipedia.org/wiki/Tibidabo_Amusement_Park"
+    },
+    {
+      "name": "Arc de Triomf",
+      "category": "Historical",
+      "description": "A red-brick triumphal arch built for the 1888 World Fair, featuring Moorish and neo-Mudéjar styles, free to visit and ideal for photos.",
+      "coordinates": {
+        "latitude": 41.3910,
+        "longitude": 2.1810
+      },
+      "address": "Passeig de Lluís Companys, 08003 Barcelona, Spain",
+      "openingHours": "24/7",
+      "admissionFee": "Free",
+      "bestTimeToVisit": "Morning, spring for fewer crowds",
+      "durationOfVisit": "Approximately 30 minutes",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Arc_de_Triomf",
+      "youTube": "https://youtube.com/example-arc-de-triomf-tour"
+    },
+    {
+      "name": "Plaça d'Espanya",
+      "category": "Unique Places",
+      "description": "A large square with fountains, the Venetian Towers, and views towards Montjuïc, free to explore and a hub for events.",
+      "coordinates": {
+        "latitude": 41.3730,
+        "longitude": 2.1490
+      },
+      "address": "Plaça d'Espanya, 08004 Barcelona, Spain",
+      "openingHours": "24/7",
+      "admissionFee": "Free",
+      "bestTimeToVisit": "Evening, summer for illuminated fountains",
+      "durationOfVisit": "Approximately 1 hour",
+      "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Plaça_d'Espanya",
+      "youTube": "https://youtube.com/example-placa-despanya-tour"
+    },
+    {
+      "name": "Museu del Disseny de Barcelona (Exterior)",
+      "category": "Art",
+      "description": "While the museum has an entry fee, the exterior and surrounding Plaça de les Glòries Catalanes are free, offering modern architecture to admire.",
+      "coordinates": {
+        "latitude": 41.3830,
+        "longitude": 2.1760
+      },
+      "address": "Plaça de les Glòries Catalanes, 37, 08018 Barcelona, Spain",
+      "openingHours": "24/7 (exterior)",
+      "admissionFee": "Free (exterior)",
+      "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
+      "durationOfVisit": "Approximately 30 minutes",
+      "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Museu_del_Disseny_de_Barcelona",
+      "youTube": "https://youtube.com/example-museu-disseny-exterior-tour"
+    },
+    {
+      "name": "Gran Teatre del Liceu (Facade)",
+      "category": "Historical",
+      "description": "The facade of this historic opera house on La Rambla is free to view, offering a glimpse of its cultural significance.",
+      "coordinates": {
+        "latitude": 41.3800,
+        "longitude": 2.1740
+      },
+      "address": "La Rambla, 51-59, 08002 Barcelona, Spain",
+      "openingHours": "24/7 (exterior)",
+      "admissionFee": "Free (exterior)",
+      "bestTimeToVisit": "Morning, spring for fewer crowds",
+      "durationOfVisit": "Approximately 30 minutes",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Gran_Teatre_del_Liceu",
+      "youTube": "https://youtube.com/example-gran-teatre-liceu-facade-tour"
+    },
+    {
+      "name": "Mercat de Sant Antoni",
+      "category": "Historical",
+      "description": "A historic market with a modernist iron structure, free to wander and experience local produce and culture.",
+      "coordinates": {
+        "latitude": 41.3790,
+        "longitude": 2.1640
+      },
+      "address": "Carrer del Comte d'Urgell, 1, 08011 Barcelona, Spain",
+      "openingHours": "8:00 AM - 8:30 PM",
+      "admissionFee": "Free",
+      "bestTimeToVisit": "Morning, spring for freshest produce",
+      "durationOfVisit": "Approximately 1 hour",
+      "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Mercat_de_Sant_Antoni",
+      "youTube": "https://youtube.com/example-mercat-sant-antoni-tour"
+    },
+    {
+      "name": "Carrer del Paradís",
+      "category": "Historical",
+      "description": "A medieval street with Roman ruins, including the Temple of Augustus, free to explore and rich in history.",
+      "coordinates": {
+        "latitude": 41.3830,
+        "longitude": 2.1760
+      },
+      "address": "Carrer del Paradís, 08002 Barcelona, Spain",
+      "openingHours": "24/7",
+      "admissionFee": "Free",
+      "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
+      "durationOfVisit": "Approximately 30 minutes",
+      "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Carrer_del_Paradís",
+      "youTube": "https://youtube.com/example-carrer-paradis-tour"
+    },
+    {
+      "name": "Parc de Joan Miró",
+      "category": "Nature",
+      "description": "A modern park with sculptures by Joan Miró, including the large 'Dona i Ocell,' free entry and great for relaxation.",
+      "coordinates": {
+        "latitude": 41.3790,
+        "longitude": 2.1590
+      },
+      "address": "Carrer de Tarragona, 141, 08014 Barcelona, Spain",
+      "openingHours": "10:00 AM - 10:00 PM",
+      "admissionFee": "Free",
+      "bestTimeToVisit": "Morning, spring for fewer crowds",
+      "durationOfVisit": "1-2 hours",
+      "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_Joan_Miró",
+      "youTube": "https://youtube.com/example-parc-joan-miro-tour"
+    },
+    {
+      "name": "Plaça del Rei",
+      "category": "Historical",
+      "description": "A historic square in the Gothic Quarter, surrounded by medieval buildings, free to visit and rich with history.",
+      "coordinates": {
+        "latitude": 41.3830,
+        "longitude": 2.1760
+      },
+      "address": "Plaça del Rei, 08002 Barcelona, Spain",
+      "openingHours": "24/7",
+      "admissionFee": "Free",
+      "bestTimeToVisit": "Evening, summer for ambiance",
+      "durationOfVisit": "Approximately 30 minutes",
+      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Plaça_del_Rei",
+      "youTube": "https://youtube.com/example-placa-del-rei-tour"
+    },
+    {
+      "name": "Port Vell",
+      "category": "Unique Places",
+      "description": "The old port area with marina views, free to stroll and enjoy waterfront activities.",
+      "coordinates": {
+        "latitude": 41.3780,
+        "longitude": 2.1840
+      },
+      "address": "Moll d'Espanya, 08039 Barcelona, Spain",
+      "openingHours": "24/7",
+      "admissionFee": "Free",
+      "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
+      "durationOfVisit": "1-2 hours",
+      "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/Port_Vell",
+      "youTube": "https://youtube.com/example-port-vell-tour"
+    },
+    {
+      "name": "El Raval Neighborhood",
+      "category": "Unique Places",
+      "description": "A diverse area with street art, cafes, and cultural spots, free to explore and experience local life.",
+      "coordinates": {
+        "latitude": 41.3830,
+        "longitude": 2.1660
+      },
+      "address": "El Raval, 08001 Barcelona, Spain",
+      "openingHours": "24/7",
+      "admissionFee": "Free",
+      "bestTimeToVisit": "Morning, spring for fewer crowds",
+      "durationOfVisit": "1-2 hours",
+      "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
+      "wikipedia": "https://en.wikipedia.org/wiki/El_Raval",
+      "youTube": "https://youtube.com/example-el-raval-tour"
+    },
+    {
+      "name": "Razzmatazz",
+      "category": "Nightlife",
+      "description": "A multi-room club with varied music genres, entry around €15-20 including a drink, known for excellent sound and vibe.",
+      "address": "Carrer dels Almogàvers, 122, 08018 Barcelona, Spain",
+      "entryFee": "€15-20",
+      "bestTimeToVisit": "Thursday to Saturday, 12:00 AM onwards",
+      "rating": "4.5/5, based on Time Out reviews",
+      "website": "https://razzmatazz.com",
+      "youTube": "https://youtube.com/example-razzmatazz-night"
+    },
+    {
+      "name": "Sala Apolo",
+      "category": "Nightlife",
+      "description": "Offers concerts and club nights, entry €10-15, known for friendly staff and diverse events.",
+      "address": "Carrer Nou de la Rambla, 113, 08004 Barcelona, Spain",
+      "entryFee": "€10-15",
+      "bestTimeToVisit": "Friday to Sunday, 11:00 PM onwards",
+      "rating": "4.4/5, based on The Culture Trip reviews",
+      "website": "https://sala-apolo.com",
+      "youTube": "https://youtube.com/example-sala-apolo-night"
+    },
+    {
+      "name": "Opium Barcelona",
+      "category": "Nightlife",
+      "description": "Beachfront club with entry around €20 including a drink, offering luxury service and top DJs.",
+      "address": "Passeig Marítim de la Barceloneta, 34, 08003 Barcelona, Spain",
+      "entryFee": "€20",
+      "bestTimeToVisit": "Friday to Sunday, 12:00 AM onwards",
+      "rating": "4.6/5, based on Time Out reviews",
+      "website": "https://opiumbarcelona.com",
+      "youTube": "https://youtube.com/example-opium-barcelona-night"
+    }
+        ];
+        
+        // Store markers for each location
+        const markers = [];
+        
+        // Function to add marker for an attraction
+        function addMarker(attraction) {
+            const config = categoryConfig[attraction.category] || { color: "#000000", icon: "📍" };
+            
+            const markerIcon = L.divIcon({
+                html: `<div style="background-color: ${config.color}; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px;">${config.icon}</div>`,
+                className: '',
+                iconSize: [30, 30]
+            });
+            
+            const marker = L.marker([attraction.coordinates.latitude, attraction.coordinates.longitude], { 
+                icon: markerIcon,
+                title: attraction.name
+            }).addTo(map);
+            
+            marker.attractionData = attraction;
+            markers.push(marker);
+            
+            marker.on('click', function() {
+                showLocationInfo(attraction);
+            });
+        }
+        
+        // Function to show location info in the bottom sidebar
+        function showLocationInfo(attraction) {
+            const infoContainer = document.getElementById('location-info');
+            
+            let content = `
+                <div class="info-name">${attraction.name}</div>
+                <div class="info-category" style="background-color: ${categoryConfig[attraction.category].color}; color: white;">
+                    ${categoryConfig[attraction.category].icon} ${attraction.category}
+                </div>
+                <div class="info-description">${attraction.description}</div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Address:</span> ${attraction.address}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Opening Hours:</span> ${attraction.openingHours}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Admission Fee:</span> ${attraction.admissionFee}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Best Time to Visit:</span> ${attraction.bestTimeToVisit}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Duration of Visit:</span> ${attraction.durationOfVisit}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Rating:</span> ${attraction.rating}
+                </div>
+            `;
+            
+            if (attraction.wikipedia) {
+                content += `
+                    <div class="info-links">
+                        <a href="${attraction.wikipedia}" target="_blank">Wikipedia</a>
+                    </div>
+                `;
+            }
+            
+            if (attraction.youTube) {
+                content += `
+                    <div class="info-links">
+                        <a href="${attraction.youTube}" target="_blank">YouTube</a>
+                    </div>
+                `;
+            }
+            
+            if (attraction.audioGuide) {
+                content += `
+                    <div class="info-links">
+                        <a href="${attraction.audioGuide}" target="_blank">Audio Guide</a>
+                    </div>
+                `;
+            }
+            
+            if (attraction.tourBooking) {
+                content += `
+                    <div class="info-links">
+                        <a href="${attraction.tourBooking}" target="_blank">Tour Booking</a>
+                    </div>
+                `;
+            }
+            
+            infoContainer.innerHTML = content;
+        }
+        
+        // Add markers for all attractions
+        attractions.forEach(attraction => {
+            addMarker(attraction);
+        });
+        
+        // Clear selection when tapping the map (not a marker)
+        map.on('click', function (e) {
+            if (!e.originalEvent.target.closest('.leaflet-marker-icon')) {
+                document.getElementById('location-info').innerHTML = `
+                    <div class="no-selection">
+                        Select a location on the map to see its details
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
