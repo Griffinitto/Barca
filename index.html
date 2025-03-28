@@ -202,7 +202,8 @@
             "Unique Places": { color: "#581845", icon: "🌟" },
             "Nature": { color: "#2ECC71", icon: "🌳" },
             "Amusement Park": { color: "#3498DB", icon: "🎢" },
-            "Nightlife": { color: "#8E44AD", icon: "🍸" }
+            "Nightlife": { color: "#8E44AD", icon: "🍸" },
+            "city out": { color: "#FF5723", icon: "🏙️" },
         };
 
         // Initialize map
@@ -226,6 +227,7 @@
                 <div class="legend-item"><i style="background: #2ECC71"></i> Nature</div>
                 <div class="legend-item"><i style="background: #3498DB"></i> Amusement Park</div>
                 <div class="legend-item"><i style="background: #8E44AD"></i> Nightlife</div>
+                <div class="legend-item"><i style="background: #FF5723"></i> city out</div>
             `;
             return div;
         };
@@ -717,42 +719,89 @@
       "wikipedia": "https://en.wikipedia.org/wiki/El_Raval",
       "youTube": "https://youtube.com/example-el-raval-tour"
     },
+    
     {
-      "name": "Razzmatazz",
-      "category": "Nightlife",
-      "description": "A multi-room club with varied music genres, entry around €15-20 including a drink, known for excellent sound and vibe.",
-      "address": "Carrer dels Almogàvers, 122, 08018 Barcelona, Spain",
-      "entryFee": "€15-20",
-      "bestTimeToVisit": "Thursday to Saturday, 12:00 AM onwards",
-      "rating": "4.5/5, based on Time Out reviews",
-      "website": "https://razzmatazz.com",
-      "youTube": "https://youtube.com/example-razzmatazz-night"
+        "name": "Parc de Joan Miró",
+        "category": "Nature",
+        "description": "A modern park with sculptures by Joan Miró, including the large 'Dona i Ocell,' free entry and great for relaxation.",
+        "coordinates": {
+            "latitude": 41.3790,
+            "longitude": 2.1590
+        },
+        "address": "Carrer de Tarragona, 141, 08014 Barcelona, Spain",
+        "openingHours": "10:00 AM - 10:00 PM",
+        "admissionFee": "Free",
+        "bestTimeToVisit": "Morning, spring for fewer crowds",
+        "durationOfVisit": "1-2 hours",
+        "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025",
+        "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_Joan_Miró",
+        "youTube": "https://youtube.com/example-parc-joan-miro-tour"
     },
     {
-      "name": "Sala Apolo",
-      "category": "Nightlife",
-      "description": "Offers concerts and club nights, entry €10-15, known for friendly staff and diverse events.",
-      "address": "Carrer Nou de la Rambla, 113, 08004 Barcelona, Spain",
-      "entryFee": "€10-15",
-      "bestTimeToVisit": "Friday to Sunday, 11:00 PM onwards",
-      "rating": "4.4/5, based on The Culture Trip reviews",
-      "website": "https://sala-apolo.com",
-      "youTube": "https://youtube.com/example-sala-apolo-night"
+        "name": "Razzmatazz",
+        "category": "Nightlife",
+        "description": "A multi-room club with varied music genres, entry around €15-20 including a drink, known for excellent sound and vibe.",
+        "coordinates": {
+            "latitude": 41.3971,
+            "longitude": 2.1696
+        },
+        "address": "Carrer dels Almogàvers, 122, 08018 Barcelona, Spain",
+        "entryFee": "€15-20",
+        "bestTimeToVisit": "Thursday to Saturday, 12:00 AM onwards",
+        "rating": "4.5/5, based on Time Out reviews",
+        "website": "https://www.salarazzmatazz.com/en/",
+        "youTube": "https://youtube.com/example-razzmatazz-night"
     },
     {
-      "name": "Opium Barcelona",
-      "category": "Nightlife",
-      "description": "Beachfront club with entry around €20 including a drink, offering luxury service and top DJs.",
-      "address": "Passeig Marítim de la Barceloneta, 34, 08003 Barcelona, Spain",
-      "entryFee": "€20",
-      "bestTimeToVisit": "Friday to Sunday, 12:00 AM onwards",
-      "rating": "4.6/5, based on Time Out reviews",
-      "website": "https://opiumbarcelona.com",
-      "youTube": "https://youtube.com/example-opium-barcelona-night"
+        "name": "Sala Apolo",
+        "category": "Nightlife",
+        "description": "Offers concerts and club nights, entry €10-15, known for friendly staff and diverse events.",
+        "coordinates": {
+            "latitude": 41.3744,
+            "longitude": 2.1673
+        },
+        "address": "Carrer Nou de la Rambla, 113, 08004 Barcelona, Spain",
+        "entryFee": "€10-15",
+        "bestTimeToVisit": "Friday to Sunday, 11:00 PM onwards",
+        "rating": "4.4/5, based on The Culture Trip reviews",
+        "website": "https://www.sala-apolo.com/en/",
+        "youTube": "https://youtube.com/example-sala-apolo-night"
+    },
+    {
+        "name": "Opium Barcelona",
+        "category": "Nightlife",
+        "description": "Beachfront club with entry around €20 including a drink, offering luxury service and top DJs.",
+        "coordinates": {
+            "latitude": 41.3771,
+            "longitude": 2.1970
+        },
+        "address": "Passeig Marítim de la Barceloneta, 34, 08003 Barcelona, Spain",
+        "entryFee": "€20",
+        "bestTimeToVisit": "Friday to Sunday, 12:00 AM onwards",
+        "rating": "4.6/5, based on Time Out reviews",
+        "website": "https://opiumbarcelona.com/en/",
+        "youTube": "https://youtube.com/example-opium-barcelona-night"
+    },
+    {
+        "name": "Plaça de Catalunya",
+        "category": "city out",
+        "description": "The central square of Barcelona, a bustling hub connecting the old city and the Eixample district, surrounded by shops and fountains.",
+        "coordinates": {
+            "latitude": 41.3870,
+            "longitude": 2.1700
+        },
+        "address": "Plaça de Catalunya, 08002 Barcelona, Spain",
+        "openingHours": "24/7",
+        "admissionFee": "Free",
+        "bestTimeToVisit": "Morning or evening for a lively atmosphere",
+        "durationOfVisit": "30 minutes - 1 hour",
+        "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+        "wikipedia": "https://en.wikipedia.org/wiki/Plaça_de_Catalunya",
+        "youTube": "https://youtube.com/example-placa-catalunya-tour"
     },
   {
     "name": "Plaça de Catalunya",
-    "category": "Unique Places",
+    "category": "city out",
     "description": "The central square of Barcelona, a bustling hub connecting the old city and the Eixample district, surrounded by shops and fountains.",
     "coordinates": {
       "latitude": 41.3870,
@@ -769,7 +818,7 @@
   },
   {
     "name": "Montserrat Monastery",
-    "category": "Unique Places",
+    "category": "city out",
     "description": "A historic Benedictine monastery nestled in the jagged Montserrat mountains, home to the revered Black Madonna statue.",
     "coordinates": {
       "latitude": 41.5935,
@@ -786,7 +835,7 @@
   },
   {
     "name": "Sitges Beach",
-    "category": "Unique Places",
+    "category": "city out",
     "description": "A picturesque coastal town with sandy beaches, charming streets, and a vibrant cultural scene, known for its film festival.",
     "coordinates": {
       "latitude": 41.2351,
@@ -803,7 +852,7 @@
   },
   {
     "name": "Dalí Theatre-Museum",
-    "category": "Unique Places",
+    "category": "city out",
     "description": "A surreal museum in Figueres designed by Salvador Dalí, showcasing his eccentric artworks and tomb.",
     "coordinates": {
       "latitude": 42.2681,
@@ -820,7 +869,7 @@
   },
   {
     "name": "Girona Old Town",
-    "category": "Unique Places",
+    "category": "city out",
     "description": "A medieval city with colorful riverside houses, a grand cathedral, and ancient walls featured in Game of Thrones.",
     "coordinates": {
       "latitude": 41.9851,
@@ -837,7 +886,7 @@
   },
   {
     "name": "Costa Brava (Tossa de Mar)",
-    "category": "Nature",
+    "category": "city out",
     "description": "A stunning coastal town with a medieval castle, clear waters, and sandy beaches along the rugged Costa Brava.",
     "coordinates": {
       "latitude": 41.7206,
@@ -854,7 +903,7 @@
   },
   {
     "name": "Colònia Güell",
-    "category": "Unique Places",
+    "category": "city outt",
     "description": "A Gaudí-designed crypt in an industrial village, a UNESCO site with unique architecture.",
     "coordinates": {
       "latitude": 41.3637,
@@ -871,7 +920,7 @@
   },
   {
     "name": "Vilafranca del Penedès",
-    "category": "Unique Places",
+    "category": "city out",
     "description": "A wine town in the Penedès region, famous for its cava and the Vinseum wine museum.",
     "coordinates": {
       "latitude": 41.3461,
@@ -888,7 +937,7 @@
   },
   {
     "name": "Cardona Castle",
-    "category": "Historical",
+    "category": "city out",
     "description": "A medieval fortress with a Romanesque church and nearby salt mines, offering panoramic views.",
     "coordinates": {
       "latitude": 41.9139,
@@ -905,7 +954,7 @@
   },
   {
     "name": "Sant Cugat Monastery",
-    "category": "Historical",
+    "category": "city out",
     "description": "A Romanesque monastery with a beautiful cloister and historical significance.",
     "coordinates": {
       "latitude": 41.4735,
@@ -922,7 +971,7 @@
   },
   {
     "name": "Cava Wineries (Sant Sadurní d’Anoia)",
-    "category": "Unique Places",
+    "category": "city out",
     "description": "The heart of Catalonia’s cava production, with tours at wineries like Freixenet and Codorníu.",
     "coordinates": {
       "latitude": 41.4254,
