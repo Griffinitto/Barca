@@ -194,30 +194,17 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <script>
-       // Define category colors and icons
-const categoryConfig = {
-    "Art": { color: "#FF5733", icon: "🎨" },
-    "Historical": { color: "#C70039", icon: "🏛️" },
-    "Entertainment": { color: "#900C3F", icon: "🎭" },
-    "Unique Places": { color: "#581845", icon: "🌟" },
-    "Nature": { color: "#2ECC71", icon: "🌳" },
-    "Amusement Park": { color: "#3498DB", icon: "🎢" },
-    "Nightlife": { color: "#8E44AD", icon: "🍸" },
-    "city out": { color: "#FF5723", icon: "🏙️" },
-    // New food and drink categories
-    "Fine Dining": { color: "#E74C3C", icon: "🍽️" },
-    "Historic": { color: "#CB4335", icon: "🏮" },
-    "Tapas": { color: "#EC7063", icon: "🥘" },
-    "Traditional": { color: "#CD6155", icon: "🍲" },
-    "Contemporary": { color: "#F1948A", icon: "🍴" },
-    "Cocktail Bar": { color: "#9B59B6", icon: "🍹" },
-    "Pub": { color: "#8E44AD", icon: "🍺" },
-    "Historic Bar": { color: "#7D3C98", icon: "🥃" },
-    "Vermouth Bar": { color: "#A569BD", icon: "🍷" },
-    "Wine Bar": { color: "#BB8FCE", icon: "🍇" },
-    "Bar": { color: "#C39BD3", icon: "🥂" },
-    "Craft Beer Pub": { color: "#D2B4DE", icon: "🍻" }
-};
+        // Define category colors and icons
+        const categoryConfig = {
+            "Art": { color: "#FF5733", icon: "🎨" },
+            "Historical": { color: "#C70039", icon: "🏛️" },
+            "Entertainment": { color: "#900C3F", icon: "🎭" },
+            "Unique Places": { color: "#581845", icon: "🌟" },
+            "Nature": { color: "#2ECC71", icon: "🌳" },
+            "Amusement Park": { color: "#3498DB", icon: "🎢" },
+            "Nightlife": { color: "#8E44AD", icon: "🍸" },
+            "city out": { color: "#FF5723", icon: "🏙️" },
+        };
 
         // Initialize map
         const map = L.map('map').setView([41.3851, 2.1734], 13);
@@ -228,38 +215,22 @@ const categoryConfig = {
         }).addTo(map);
         
         // Dynamic legend position
-const legendPosition = window.innerWidth <= 767 ? 'topright' : 'bottomright';
-const legend = L.control({ position: legendPosition });
-legend.onAdd = function (map) {
-    const div = L.DomUtil.create('div', 'legend');
-    div.innerHTML = `
-        <div class="legend-item"><i style="background: #FF5733"></i> Art</div>
-        <div class="legend-item"><i style="background: #C70039"></i> Historical</div>
-        <div class="legend-item"><i style="background: #900C3F"></i> Entertainment</div>
-        <div class="legend-item"><i style="background: #581845"></i> Unique Places</div>
-        <div class="legend-item"><i style="background: #2ECC71"></i> Nature</div>
-        <div class="legend-item"><i style="background: #3498DB"></i> Amusement Park</div>
-        <div class="legend-item"><i style="background: #8E44AD"></i> Nightlife</div>
-        <div class="legend-item"><i style="background: #FF5723"></i> City Out</div>
-        
-        <!-- Food categories -->
-        <div class="legend-item"><i style="background: #E74C3C"></i> Fine Dining</div>
-        <div class="legend-item"><i style="background: #CB4335"></i> Historic</div>
-        <div class="legend-item"><i style="background: #EC7063"></i> Tapas</div>
-        <div class="legend-item"><i style="background: #CD6155"></i> Traditional</div>
-        <div class="legend-item"><i style="background: #F1948A"></i> Contemporary</div>
-        
-        <!-- Drink categories -->
-        <div class="legend-item"><i style="background: #9B59B6"></i> Cocktail Bar</div>
-        <div class="legend-item"><i style="background: #8E44AD"></i> Pub</div>
-        <div class="legend-item"><i style="background: #7D3C98"></i> Historic Bar</div>
-        <div class="legend-item"><i style="background: #A569BD"></i> Vermouth Bar</div>
-        <div class="legend-item"><i style="background: #BB8FCE"></i> Wine Bar</div>
-        <div class="legend-item"><i style="background: #C39BD3"></i> Bar</div>
-        <div class="legend-item"><i style="background: #D2B4DE"></i> Craft Beer Pub</div>
-    `;
-    return div;
-};
+        const legendPosition = window.innerWidth <= 767 ? 'topright' : 'bottomright';
+        const legend = L.control({ position: legendPosition });
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <div class="legend-item"><i style="background: #FF5733"></i> Art</div>
+                <div class="legend-item"><i style="background: #C70039"></i> Historical</div>
+                <div class="legend-item"><i style="background: #900C3F"></i> Entertainment</div>
+                <div class="legend-item"><i style="background: #581845"></i> Unique Places</div>
+                <div class="legend-item"><i style="background: #2ECC71"></i> Nature</div>
+                <div class="legend-item"><i style="background: #3498DB"></i> Amusement Park</div>
+                <div class="legend-item"><i style="background: #8E44AD"></i> Nightlife</div>
+                <div class="legend-item"><i style="background: #FF5723"></i> city out</div>
+            `;
+            return div;
+        };
         legend.addTo(map);
 
         // Load attraction data
@@ -811,7 +782,23 @@ legend.onAdd = function (map) {
         "website": "https://opiumbarcelona.com/en/",
         "youTube": "https://youtube.com/example-opium-barcelona-night"
     },
-
+    {
+        "name": "Plaça de Catalunya",
+        "category": "city out",
+        "description": "The central square of Barcelona, a bustling hub connecting the old city and the Eixample district, surrounded by shops and fountains.",
+        "coordinates": {
+            "latitude": 41.3870,
+            "longitude": 2.1700
+        },
+        "address": "Plaça de Catalunya, 08002 Barcelona, Spain",
+        "openingHours": "24/7",
+        "admissionFee": "Free",
+        "bestTimeToVisit": "Morning or evening for a lively atmosphere",
+        "durationOfVisit": "30 minutes - 1 hour",
+        "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+        "wikipedia": "https://en.wikipedia.org/wiki/Plaça_de_Catalunya",
+        "youTube": "https://youtube.com/example-placa-catalunya-tour"
+    },
   {
     "name": "Plaça de Catalunya",
     "category": "city out",
@@ -916,7 +903,7 @@ legend.onAdd = function (map) {
   },
   {
     "name": "Colònia Güell",
-    "category": "city out",
+    "category": "city outt",
     "description": "A Gaudí-designed crypt in an industrial village, a UNESCO site with unique architecture.",
     "coordinates": {
       "latitude": 41.3637,
@@ -999,519 +986,6 @@ legend.onAdd = function (map) {
     "wikipedia": "https://en.wikipedia.org/wiki/Sant_Sadurní_d%27Anoia",
     "youTube": "https://youtube.com/example-cava-wineries-tour"
   }
-    
-  {
-    "name": "Paradiso" ,
-    "category": "Cocktail Bar",
-    "description": "A speakeasy-style bar ranked among the world’s best, hidden behind a pastrami shop.",
-    "coordinates": {
-      "latitude": 41.3830,
-      "longitude": 2.1790,
-    },
-    "address": "Carrer de Rera Palau, 4, 08003 Barcelona, Spain",
-    "openingHours": "7:00 PM - 2:00 AM",
-    "admissionFee": "€12-15 (average drink)",
-    "bestTimeToVisit": "Evening for cocktails",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.8/5, based on TripAdvisor reviews",
-    "reservationLink": "https://paradiso.cat/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3830,2.1790",
-    },
-
-  {
-    "name": "Dry Martini",
-    "category": "Cocktail Bar",
-    "description": "A classic martini bar frequented by celebrities like Javier Bardem, featured in films.",
-    "coordinates": {
-      "latitude": 41.3935,
-      "longitude": 2.1530,
-    },
-    "address": "Carrer d’Aribau, 162-166, 08036 Barcelona, Spain",
-    "openingHours": "5:00 PM - 2:00 AM",
-    "admissionFee": "€15-20 (average drink)",
-    "bestTimeToVisit": "Evening for sophistication",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.6/5, based on TheFork reviews",
-    "reservationLink": "https://drymartiniorg.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3935,2.1530"
-  },
-  {
-    "name": "Boadas Cocktails",
-    "category": "Cocktail Bar",
-    "description": "Barcelona’s oldest cocktail bar (since 1933), a haunt of Ernest Hemingway.",
-    "coordinates": {
-      "latitude": 41.3840,
-      "longitude": 2.1700,
-    },
-    "address": "Carrer dels Tallers, 1, 08001 Barcelona, Spain",
-    "openingHours": "12:00 PM - 2:00 AM",
-    "admissionFee": "€10-15 (average drink)",
-    "bestTimeToVisit": "Afternoon for history",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.5/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3840,2.1700"
-  },
-  {
-    "name": "El Born Bar",
-    "category": "Pub",
-    "description": "A cozy pub in El Born, popular with locals and expats for its laid-back vibe.",
-    "coordinates": {
-      "latitude": 41.3855,
-      "longitude": 2.1830
-    },
-    "address": "Passeig del Born, 27, 08003 Barcelona, Spain",
-    "openingHours": "5:00 PM - 2:00 AM",
-    "admissionFee": "€5-10 (average drink)",
-    "bestTimeToVisit": "Evening for a chill night",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.4/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3855,2.1830"
-  },
-  {
-    "name": "Bar Marsella",
-    "category": "Historic Bar",
-    "description": "A 19th-century absinthe bar, visited by Picasso and featured in 'Vicky Cristina Barcelona.'",
-    "coordinates": {
-      "latitude": 41.3780,
-      "longitude": 2.1710
-    },
-    "address": "Carrer de Sant Pau, 65, 08001 Barcelona, Spain",
-    "openingHours": "10:00 PM - 2:30 AM (closed Sun)",
-    "admissionFee": "€5-10 (average drink)",
-    "bestTimeToVisit": "Late night for ambiance",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.3/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3780,2.1710"
-  },
-  {
-    "name": "Varmuteo",
-    "category": "Vermouth Bar",
-    "description": "A trendy vermouth spot by the Alapar team, known for its casual vibe and small bites.",
-    "coordinates": {
-      "latitude": 41.3850,
-      "longitude": 2.1500
-    },
-    "address": "Carrer de Vilamarí, 2, 08015 Barcelona, Spain",
-    "openingHours": "12:00 PM - 12:00 AM",
-    "admissionFee": "€8-12 (average drink)",
-    "bestTimeToVisit": "Afternoon for vermouth",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.6/5, based on TheFork reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3850,2.1500"
-  },
-  {
-    "name": "La Confitería",
-    "category": "Cocktail Bar",
-    "description": "A former candy shop turned stylish bar, popular with the artsy crowd.",
-    "coordinates": {
-      "latitude": 41.3785,
-      "longitude": 2.1660
-    },
-    "address": "Carrer de Sant Pau, 128, 08001 Barcelona, Spain",
-    "openingHours": "6:00 PM - 2:00 AM",
-    "admissionFee": "€10-15 (average drink)",
-    "bestTimeToVisit": "Evening for atmosphere",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.5/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3785,2.1660"
-  },
-  {
-    "name": "Creps al Born",
-    "category": "Bar",
-    "description": "A quirky bar with crepes and cocktails, a hidden gem in El Born.",
-    "coordinates": {
-      "latitude": 41.3845,
-      "longitude": 2.1825
-    },
-    "address": "Carrer de la Princesa, 1, 08003 Barcelona, Spain",
-    "openingHours": "6:00 PM - 2:00 AM",
-    "admissionFee": "€8-12 (average drink)",
-    "bestTimeToVisit": "Evening for a unique vibe",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.4/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3845,2.1825"
-  },
-  {
-    "name": "Balius Bar",
-    "category": "Cocktail Bar",
-    "description": "A Poblenou favorite with live music and inventive cocktails.",
-    "coordinates": {
-      "latitude": 41.3990,
-      "longitude": 2.2030
-    },
-    "address": "Carrer de Pujades, 196, 08005 Barcelona, Spain",
-    "openingHours": "6:00 PM - 2:00 AM",
-    "admissionFee": "€10-15 (average drink)",
-    "bestTimeToVisit": "Evening for live music",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.5/5, based on TheFork reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3990,2.2030"
-  },
-  {
-    "name": "El Xampanyet",
-    "category": "Wine Bar",
-    "description": "A historic cava bar in El Born, loved for its rustic charm and cheap drinks.",
-    "coordinates": {
-      "latitude": 41.3850,
-      "longitude": 2.1835
-    },
-    "address": "Carrer de Montcada, 22, 08003 Barcelona, Spain",
-    "openingHours": "12:00 PM - 3:30 PM, 7:00 PM - 11:00 PM (closed Mon)",
-    "admissionFee": "€5-10 (average drink)",
-    "bestTimeToVisit": "Afternoon for cava",
-    "durationOfVisit": "1 hour",
-    "rating": "4.6/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3850,2.1835"
-  },
-  {
-    "name": "Bar Lobo",
-    "category": "Bar",
-    "description": "A trendy spot near La Rambla, known for its terrace and late-night vibe.",
-    "coordinates": {
-      "latitude": 41.3820,
-      "longitude": 2.1710
-    },
-    "address": "Carrer del Pintor Fortuny, 3, 08001 Barcelona, Spain",
-    "openingHours": "12:00 PM - 2:00 AM",
-    "admissionFee": "€8-12 (average drink)",
-    "bestTimeToVisit": "Evening for people-watching",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.4/5, based on TripAdvisor reviews",
-    "reservationLink": "https://grupotragaluz.com/en/restaurant/bar-lobo/",
-    "googleMapsLink": "https://maps.google.com/?q=41.3820,2.1710"
-  },
-  {
-    "name": "Milk Bar & Bistro",
-    "category": "Bar",
-    "description": "A cozy bar with brunch and cocktails, popular with expats and locals.",
-    "coordinates": {
-      "latitude": 41.3835,
-      "longitude": 2.1740
-    },
-    "address": "Carrer d’en Gignàs, 21, 08002 Barcelona, Spain",
-    "openingHours": "10:00 AM - 2:00 AM",
-    "admissionFee": "€8-12 (average drink)",
-    "bestTimeToVisit": "Evening for cocktails",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.5/5, based on TripAdvisor reviews",
-    "reservationLink": "https://milkbarcelona.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3835,2.1740"
-  },
-  {
-    "name": "Old Fashioned Gin Tonic & Cocktail Bar",
-    "category": "Cocktail Bar",
-    "description": "A small, vintage-style bar specializing in gin tonics and classic cocktails.",
-    "coordinates": {
-      "latitude": 41.3910,
-      "longitude": 2.1650
-    },
-    "address": "Carrer de Santa Teresa, 1, 08012 Barcelona, Spain",
-    "openingHours": "6:00 PM - 2:00 AM",
-    "admissionFee": "€10-15 (average drink)",
-    "bestTimeToVisit": "Evening for a relaxed vibe",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.6/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3910,2.1650"
-  },
-  {
-    "name": "BlackLab Brewhouse",
-    "category": "Craft Beer Pub",
-    "description": "A microbrewery near the beach with a wide selection of craft beers.",
-    "coordinates": {
-      "latitude": 41.3870,
-      "longitude": 2.1970
-    },
-    "address": "Plaça Pau Vila, 1, 08003 Barcelona, Spain",
-    "openingHours": "12:00 PM - 12:00 AM",
-    "admissionFee": "€6-10 (average drink)",
-    "bestTimeToVisit": "Afternoon for beer tasting",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.5/5, based on TripAdvisor reviews",
-    "reservationLink": "https://blacklab.es/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3870,2.1970"
-  },
-  {
-    "name": "Bobby Gin",
-    "category": "Cocktail Bar",
-    "description": "A sleek bar with over 60 gin varieties, a favorite among gin lovers.",
-    "coordinates": {
-      "latitude": 41.3995,
-      "longitude": 2.1665
-    },
-    "address": "Carrer de Francisco Giner, 47, 08012 Barcelona, Spain",
-    "openingHours": "7:00 PM - 2:30 AM",
-    "admissionFee": "€12-15 (average drink)",
-    "bestTimeToVisit": "Evening for gin enthusiasts",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.7/5, based on TheFork reviews",
-    "reservationLink": "https://bobbygin.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3995,2.1665"
-  },
-
-  {
-    "name": "Disfrutar",
-    "category": "Fine Dining",
-    "description": "A three-Michelin-star restaurant run by former El Bulli chefs, known for avant-garde Mediterranean cuisine. Featured in culinary documentaries.",
-    "coordinates": {
-      "latitude": 41.3940,
-      "longitude": 2.1486
-    },
-    "address": "Carrer de Villarroel, 163, 08036 Barcelona, Spain",
-    "openingHours": "1:00 PM - 3:00 PM, 7:00 PM - 10:00 PM (closed Sun-Mon)",
-    "admissionFee": "€210-250 (tasting menu)",
-    "bestTimeToVisit": "Evening, weekdays for fewer crowds",
-    "durationOfVisit": "3-4 hours",
-    "rating": "4.9/5, based on TheFork and Michelin reviews",
-    "reservationLink": "https://disfrutarbarcelona.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3940,2.1486"
-  },
-  {
-    "name": "ABaC",
-    "category": "Fine Dining",
-    "description": "Three-Michelin-star spot by Jordi Cruz, offering a 20-course tasting menu. A favorite of celebrities like Lionel Messi.",
-    "coordinates": {
-      "latitude": 41.4104,
-      "longitude": 2.1349
-    },
-    "address": "Av. del Tibidabo, 1, 08022 Barcelona, Spain",
-    "openingHours": "1:30 PM - 3:30 PM, 8:00 PM - 10:30 PM",
-    "admissionFee": "€250-300 (tasting menu)",
-    "bestTimeToVisit": "Evening for a special occasion",
-    "durationOfVisit": "3-4 hours",
-    "rating": "4.8/5, based on TripAdvisor reviews",
-    "reservationLink": "https://abacrestaurant.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.4104,2.1349"
-  },
-  {
-    "name": "Cinc Sentits",
-    "category": "Fine Dining",
-    "description": "Two-Michelin-star restaurant with modern Catalan tasting menus, praised for its sensory experience.",
-    "coordinates": {
-      "latitude": 41.3848,
-      "longitude": 2.1568
-    },
-    "address": "Carrer d’Entença, 60, 08015 Barcelona, Spain",
-    "openingHours": "1:30 PM - 3:00 PM, 8:00 PM - 10:00 PM (closed Sun-Mon)",
-    "admissionFee": "€185-200 (tasting menu)",
-    "bestTimeToVisit": "Lunch for a lighter crowd",
-    "durationOfVisit": "2-3 hours",
-    "rating": "4.7/5, based on TheFork reviews",
-    "reservationLink": "https://cincsentits.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3848,2.1568"
-  },
-  {
-    "name": "Lasarte",
-    "category": "Fine Dining",
-    "description": "Three-Michelin-star restaurant by Martín Berasategui, known for its elegant dishes and celebrity clientele.",
-    "coordinates": {
-      "latitude": 41.3912,
-      "longitude": 2.1505
-    },
-    "address": "Carrer de Mallorca, 259, 08008 Barcelona, Spain",
-    "openingHours": "1:00 PM - 3:00 PM, 8:00 PM - 10:00 PM (closed Sun-Mon)",
-    "admissionFee": "€230-280 (tasting menu)",
-    "bestTimeToVisit": "Evening for ambiance",
-    "durationOfVisit": "3-4 hours",
-    "rating": "4.8/5, based on Michelin Guide",
-    "reservationLink": "https://restaurantlasarte.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3912,2.1505"
-  },
-  {
-    "name": "Els Quatre Gats",
-    "category": "Historic",
-    "description": "A modernist café where Picasso held his first exhibition, featured in Woody Allen’s 'Vicky Cristina Barcelona.'",
-    "coordinates": {
-      "latitude": 41.3857,
-      "longitude": 2.1733
-    },
-    "address": "Carrer de Montsió, 3, 08002 Barcelona, Spain",
-    "openingHours": "12:00 PM - 1:00 AM",
-    "admissionFee": "€15-30 (average meal)",
-    "bestTimeToVisit": "Lunch for history buffs",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.3/5, based on TripAdvisor reviews",
-    "reservationLink": "https://4gats.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3857,2.1733"
-  },
-  {
-    "name": "Tickets",
-    "category": "Tapas",
-    "description": "A playful tapas bar by the Adrià brothers, known for molecular gastronomy and a lively vibe.",
-    "coordinates": {
-      "latitude": 41.3752,
-      "longitude": 2.1560
-    },
-    "address": "Avinguda del Paral·lel, 164, 08015 Barcelona, Spain",
-    "openingHours": "6:00 PM - 11:00 PM (closed Sun-Mon)",
-    "admissionFee": "€50-80 (average meal)",
-    "bestTimeToVisit": "Evening for the full experience",
-    "durationOfVisit": "2-3 hours",
-    "rating": "4.6/5, based on TheFork reviews",
-    "reservationLink": "https://elbarriadria.com/en/tickets/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3752,2.1560"
-  },
-  {
-    "name": "Can Culleretes",
-    "category": "Traditional",
-    "description": "Barcelona’s oldest restaurant (since 1786), serving classic Catalan dishes like escudella.",
-    "coordinates": {
-      "latitude": 41.3818,
-      "longitude": 2.1738
-    },
-    "address": "Carrer d’en Quintana, 5, 08002 Barcelona, Spain",
-    "openingHours": "1:00 PM - 4:00 PM, 8:00 PM - 11:00 PM (closed Mon)",
-    "admissionFee": "€20-35 (average meal)",
-    "bestTimeToVisit": "Lunch for a traditional vibe",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.4/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3818,2.1738"
-  },
-  {
-    "name": "La Cova Fumada",
-    "category": "Tapas",
-    "description": "A legendary spot in Barceloneta, rumored to have invented the bomba (spicy potato croquette).",
-    "coordinates": {
-      "latitude": 41.3795,
-      "longitude": 2.1892
-    },
-    "address": "Carrer del Baluard, 56, 08003 Barcelona, Spain",
-    "openingHours": "9:00 AM - 3:00 PM, 6:00 PM - 8:00 PM (closed Sun)",
-    "admissionFee": "€15-25 (average meal)",
-    "bestTimeToVisit": "Lunch for authenticity",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.5/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3795,2.1892"
-  },
-  {
-    "name": "Quimet & Quimet",
-    "category": "Tapas",
-    "description": "A tiny, standing-room-only tapas bar famous for montaditos and vermouth.",
-    "coordinates": {
-      "latitude": 41.3708,
-      "longitude": 2.1648
-    },
-    "address": "Carrer del Poeta Cabanyes, 25, 08004 Barcelona, Spain",
-    "openingHours": "12:00 PM - 4:00 PM, 7:00 PM - 10:30 PM (closed Sun)",
-    "admissionFee": "€20-30 (average meal)",
-    "bestTimeToVisit": "Afternoon for a quick bite",
-    "durationOfVisit": "1 hour",
-    "rating": "4.7/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3708,2.1648"
-  },
-  {
-    "name": "Teatro Kitchen & Bar",
-    "category": "Fine Dining",
-    "description": "One-Michelin-star restaurant with creative cuisine by Oliver Peña, known for its theatrical presentation.",
-    "coordinates": {
-      "latitude": 41.3859,
-      "longitude": 2.1640
-    },
-    "address": "Avinguda del Paral·lel, 164, 08015 Barcelona, Spain",
-    "openingHours": "7:00 PM - 11:00 PM (closed Sun-Mon)",
-    "admissionFee": "€150-200 (tasting menu)",
-    "bestTimeToVisit": "Evening for the show",
-    "durationOfVisit": "2-3 hours",
-    "rating": "4.8/5, based on TheFork reviews",
-    "reservationLink": "https://teatrobarcelona.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3859,2.1640"
-  },
-  {
-    "name": "Cervecería Catalana",
-    "category": "Tapas",
-    "description": "A bustling tapas spot loved by locals and tourists, featured in travel shows.",
-    "coordinates": {
-      "latitude": 41.3920,
-      "longitude": 2.1608
-    },
-    "address": "Carrer de Mallorca, 236, 08008 Barcelona, Spain",
-    "openingHours": "9:00 AM - 1:30 AM",
-    "admissionFee": "€20-35 (average meal)",
-    "bestTimeToVisit": "Evening for the buzz",
-    "durationOfVisit": "1-2 hours",
-    "rating": "4.5/5, based on TripAdvisor reviews",
-    "reservationLink": "N/A",
-    "googleMapsLink": "https://maps.google.com/?q=41.3920,2.1608"
-  },
-  {
-    "name": "Bar Cañete",
-    "category": "Tapas",
-    "description": "A high-end tapas bar with a lively atmosphere, popular with food critics.",
-    "coordinates": {
-      "latitude": 41.3800,
-      "longitude": 2.1715
-    },
-    "address": "Carrer de la Unió, 17, 08001 Barcelona, Spain",
-    "openingHours": "1:00 PM - 12:00 AM",
-    "admissionFee": "€30-50 (average meal)",
-    "bestTimeToVisit": "Evening for the energy",
-    "durationOfVisit": "2 hours",
-    "rating": "4.6/5, based on TheFork reviews",
-    "reservationLink": "https://barcanete.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3800,2.1715"
-  },
-  {
-    "name": "Koy Shunka",
-    "category": "Fine Dining",
-    "description": "One-Michelin-star Japanese restaurant, a favorite of Ferran Adrià.",
-    "coordinates": {
-      "latitude": 41.3850,
-      "longitude": 2.1740
-    },
-    "address": "Carrer d’en Copons, 7, 08002 Barcelona, Spain",
-    "openingHours": "1:30 PM - 3:30 PM, 8:30 PM - 11:00 PM (closed Mon)",
-    "admissionFee": "€100-150 (average meal)",
-    "bestTimeToVisit": "Evening for sushi lovers",
-    "durationOfVisit": "2-3 hours",
-    "rating": "4.7/5, based on Michelin reviews",
-    "reservationLink": "https://koyshunka.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3850,2.1740"
-  },
-  {
-    "name": "Suculent",
-    "category": "Contemporary",
-    "description": "A chef-favorite spot blending Catalan comfort food with global influences.",
-    "coordinates": {
-      "latitude": 41.3785,
-      "longitude": 2.1650
-    },
-    "address": "Rambla del Raval, 43, 08001 Barcelona, Spain",
-    "openingHours": "1:00 PM - 4:00 PM, 7:00 PM - 11:00 PM",
-    "admissionFee": "€40-60 (average meal)",
-    "bestTimeToVisit": "Evening for a relaxed meal",
-    "durationOfVisit": "2 hours",
-    "rating": "4.6/5, based on TripAdvisor reviews",
-    "reservationLink": "https://suculent.com/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3785,2.1650"
-  },
-  {
-    "name": "Gresca",
-    "category": "Contemporary",
-    "description": "A chef-driven spot with seasonal Catalan dishes, loved for its nose-to-tail approach.",
-    "coordinates": {
-      "latitude": 41.3950,
-      "longitude": 2.1560
-    },
-    "address": "Carrer de Provença, 230, 08036 Barcelona, Spain",
-    "openingHours": "1:00 PM - 3:30 PM, 8:00 PM - 11:00 PM (closed Sun)",
-    "admissionFee": "€50-70 (average meal)",
-    "bestTimeToVisit": "Lunch for a quieter visit",
-    "durationOfVisit": "2 hours",
-    "rating": "4.7/5, based on TheFork reviews",
-    "reservationLink": "https://gresca.net/en/reservations",
-    "googleMapsLink": "https://maps.google.com/?q=41.3950,2.1560"
-  }
 
         ];
         
@@ -1542,100 +1016,75 @@ legend.onAdd = function (map) {
         }
         
         // Function to show location info in the bottom sidebar
-        // Function to show location info in the bottom sidebar
-function showLocationInfo(attraction) {
-    const infoContainer = document.getElementById('location-info');
-    
-    let content = `
-        <div class="info-name">${attraction.name}</div>
-        <div class="info-category" style="background-color: ${categoryConfig[attraction.category].color}; color: white;">
-            ${categoryConfig[attraction.category].icon} ${attraction.category}
-        </div>
-        <div class="info-description">${attraction.description}</div>
-        
-        <div class="info-detail">
-            <span class="info-label">Address:</span> ${attraction.address}
-        </div>
-    `;
-    
-    if (attraction.openingHours) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Opening Hours:</span> ${attraction.openingHours}
-            </div>
-        `;
-    }
-    
-    if (attraction.admissionFee) {
-        // This field can be admission fee for attractions or average price for restaurants/bars
-        const label = ['Fine Dining', 'Historic', 'Tapas', 'Traditional', 'Contemporary', 
-                       'Cocktail Bar', 'Pub', 'Historic Bar', 'Vermouth Bar', 'Wine Bar', 
-                       'Bar', 'Craft Beer Pub'].includes(attraction.category) 
-                       ? 'Price Range:' : 'Admission Fee:';
-        
-        content += `
-            <div class="info-detail">
-                <span class="info-label">${label}</span> ${attraction.admissionFee}
-            </div>
-        `;
-    }
-    
-    if (attraction.bestTimeToVisit) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Best Time to Visit:</span> ${attraction.bestTimeToVisit}
-            </div>
-        `;
-    }
-    
-    if (attraction.durationOfVisit) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Duration of Visit:</span> ${attraction.durationOfVisit}
-            </div>
-        `;
-    }
-    
-    if (attraction.rating) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Rating:</span> ${attraction.rating}
-            </div>
-        `;
-    }
-    
-    // Links section
-    content += `<div class="info-links">`;
-    
-    if (attraction.wikipedia) {
-        content += `<a href="${attraction.wikipedia}" target="_blank">Wikipedia</a>`;
-    }
-    
-    if (attraction.youTube) {
-        content += `<a href="${attraction.youTube}" target="_blank">YouTube</a>`;
-    }
-    
-    if (attraction.audioGuide) {
-        content += `<a href="${attraction.audioGuide}" target="_blank">Audio Guide</a>`;
-    }
-    
-    if (attraction.tourBooking) {
-        content += `<a href="${attraction.tourBooking}" target="_blank">Tour Booking</a>`;
-    }
-    
-    // Restaurant/bar specific links
-    if (attraction.reservationLink) {
-        content += `<a href="${attraction.reservationLink}" target="_blank">Make Reservation</a>`;
-    }
-    
-    if (attraction.googleMapsLink) {
-        content += `<a href="${attraction.googleMapsLink}" target="_blank">Google Maps</a>`;
-    }
-    
-    content += `</div>`;
-    
-    infoContainer.innerHTML = content;
-}
+        function showLocationInfo(attraction) {
+            const infoContainer = document.getElementById('location-info');
+            
+            let content = `
+                <div class="info-name">${attraction.name}</div>
+                <div class="info-category" style="background-color: ${categoryConfig[attraction.category].color}; color: white;">
+                    ${categoryConfig[attraction.category].icon} ${attraction.category}
+                </div>
+                <div class="info-description">${attraction.description}</div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Address:</span> ${attraction.address}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Opening Hours:</span> ${attraction.openingHours}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Admission Fee:</span> ${attraction.admissionFee}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Best Time to Visit:</span> ${attraction.bestTimeToVisit}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Duration of Visit:</span> ${attraction.durationOfVisit}
+                </div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Rating:</span> ${attraction.rating}
+                </div>
+            `;
+            
+            if (attraction.wikipedia) {
+                content += `
+                    <div class="info-links">
+                        <a href="${attraction.wikipedia}" target="_blank">Wikipedia</a>
+                    </div>
+                `;
+            }
+            
+            if (attraction.youTube) {
+                content += `
+                    <div class="info-links">
+                        <a href="${attraction.youTube}" target="_blank">YouTube</a>
+                    </div>
+                `;
+            }
+            
+            if (attraction.audioGuide) {
+                content += `
+                    <div class="info-links">
+                        <a href="${attraction.audioGuide}" target="_blank">Audio Guide</a>
+                    </div>
+                `;
+            }
+            
+            if (attraction.tourBooking) {
+                content += `
+                    <div class="info-links">
+                        <a href="${attraction.tourBooking}" target="_blank">Tour Booking</a>
+                    </div>
+                `;
+            }
+            
+            infoContainer.innerHTML = content;
+        }
         
         // Add markers for all attractions
         attractions.forEach(attraction => {
