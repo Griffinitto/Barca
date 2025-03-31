@@ -18,6 +18,7 @@
         #map-container {
             flex: 1;
             height: 100%;
+            position: relative;
         }
         
         #right-sidebar {
@@ -51,7 +52,7 @@
         
         .location-name {
             font-weight: bold;
-            margin-bottom: 5px; /* Fixed syntax error */
+            margin-bottom: 5px;
         }
         
         .location-category {
@@ -142,6 +143,98 @@
             margin-bottom: 5px;
         }
 
+        /* Filter panel styles */
+        #filter-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            max-width: 220px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .filter-control {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-toggle {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 2px solid #ccc;
+            border-radius: 3px;
+            outline: none;
+            position: relative;
+        }
+        
+        .filter-toggle:checked {
+            background-color: #4a66a0;
+            border-color: #4a66a0;
+        }
+        
+        .filter-toggle:checked::after {
+            content: '✓';
+            font-size: 14px;
+            color: white;
+            position: absolute;
+            top: -1px;
+            left: 2px;
+        }
+        
+        .filter-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .color-indicator {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        
+        .toggle-all-btn {
+            background-color: #4a66a0;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .toggle-all-btn:hover {
+            background-color: #3a5690;
+        }
+        
+        .filter-icon {
+            display: block;
+            margin-right: 5px;
+            font-size: 16px;
+            min-width: 20px;
+            text-align: center;
+        }
+
         /* Mobile adjustments */
         @media (max-width: 767px) {
             #right-sidebar {
@@ -175,12 +268,30 @@
                 padding: 8px;
                 margin: -10px -10px 5px -10px;
             }
+            
+            #filter-panel {
+                max-width: 160px;
+                max-height: 40vh;
+            }
+            
+            .filter-control {
+                margin-bottom: 5px;
+            }
         }
     </style>
 </head>
 <body>
     <div id="map-container">
         <div id="map"></div>
+        <div id="filter-panel">
+            <div class="filter-title">
+                Filter Categories
+                <button id="toggle-all" class="toggle-all-btn">Select All</button>
+            </div>
+            <div id="filter-controls">
+                <!-- Filter checkboxes will be added here dynamically -->
+            </div>
+        </div>
     </div>
     
     <div id="right-sidebar">
@@ -194,7 +305,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <script>
-        // Define category colors and icons
         // Define category colors and icons
         const categoryConfig = {
             "Art": { color: "#FF5733", icon: "🎨" },
@@ -217,26 +327,7 @@
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
         
-        // Dynamic legend position
-        const legendPosition = window.innerWidth <= 767 ? 'topright' : 'bottomright';
-        const legend = L.control({ position: legendPosition });
-        legend.onAdd = function (map) {
-            const div = L.DomUtil.create('div', 'legend');
-            div.innerHTML = `
-                <div class="legend-item"><i style="background: #FF5733"></i> Art</div>
-                <div class="legend-item"><i style="background: #C70039"></i> Historical</div>
-                <div class="legend-item"><i style="background: #900C3F"></i> Entertainment</div>
-                <div class="legend-item"><i style="background: #581845"></i> Unique Places</div>
-                <div class="legend-item"><i style="background: #2ECC71"></i> Nature</div>
-                <div class="legend-item"><i style="background: #3498DB"></i> Amusement Park</div>
-                <div class="legend-item"><i style="background: #8E44AD"></i> Nightlife</div>
-                <div class="legend-item"><i style="background: #FF5723"></i> city out</div>
-                <div class="legend-item"><i style="background: #0A0A0A"></i> Dining</div>
-                <div class="legend-item"><i style="background: #1E1E1E"></i> Bars and Pubs</div>
-            `;
-            return div;
-        };
-        legend.addTo(map);
+        
 
         // Load attraction data
         const attractions = [
@@ -1414,11 +1505,17 @@
     reservationLink: "https://bobbygin.com/en/reservations",
     googleMapsLink: "https://maps.google.com/?q=41.3995,2.1665"
   },
-
-]
+        ];
         
-        // Store markers for each location
+        // Store markers for each location and active filters state
         const markers = [];
+        const activeFilters = {};
+        
+        // Initialize active filters (all categories are active by default)
+        const uniqueCategories = [...new Set(attractions.map(a => a.category))];
+        uniqueCategories.forEach(category => {
+            activeFilters[category] = true;
+        });
         
         // Function to add marker for an attraction
         function addMarker(attraction) {
@@ -1427,7 +1524,7 @@
             const markerIcon = L.divIcon({
                 html: `<div style="background-color: ${config.color}; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px;">${config.icon}</div>`,
                 className: '',
-                iconSize: [30, 30]
+                iconSize: [20, 20]
             });
             
             const marker = L.marker([attraction.coordinates.latitude, attraction.coordinates.longitude], { 
@@ -1441,94 +1538,226 @@
             marker.on('click', function() {
                 showLocationInfo(attraction);
             });
+            
+            return marker;
         }
         
+        // Function to display attraction info in sidebar
         function showLocationInfo(attraction) {
-    const infoContainer = document.getElementById('location-info');
-    const config = categoryConfig[attraction.category] || { color: "#000000", icon: "📍" };
-    
-    let content = `
-        <div class="info-name">${attraction.name}</div>
-        <div class="info-category" style="background-color: ${config.color}; color: white;">
-            ${config.icon} ${attraction.category}
-        </div>
-        <div class="info-description">${attraction.description}</div>
+            const infoContainer = document.getElementById('location-info');
+            const config = categoryConfig[attraction.category] || { color: "#000000", icon: "📍" };
+            
+            let content = `
+                <div class="info-name">${attraction.name}</div>
+                <div class="info-category" style="background-color: ${config.color}; color: white;">
+                    ${config.icon} ${attraction.category}
+                </div>
+                <div class="info-description">${attraction.description}</div>
+                
+                <div class="info-detail">
+                    <span class="info-label">Address:</span> ${attraction.address || 'Not specified'}
+                </div>
+            `;
+            
+            // Add common details with fallbacks
+            if (attraction.openingHours) {
+                content += `
+                    <div class="info-detail">
+                        <span class="info-label">Opening Hours:</span> ${attraction.openingHours}
+                    </div>
+                `;
+            }
+            
+            // Handle different fee names
+            const fee = attraction.admissionFee || attraction.entryFee || '';
+            if (fee) {
+                content += `
+                    <div class="info-detail">
+                        <span class="info-label">Admission:</span> ${fee}
+                    </div>
+                `;
+            }
+            
+            if (attraction.bestTimeToVisit) {
+                content += `
+                    <div class="info-detail">
+                        <span class="info-label">Best Time to Visit:</span> ${attraction.bestTimeToVisit}
+                    </div>
+                `;
+            }
+            
+            if (attraction.durationOfVisit) {
+                content += `
+                    <div class="info-detail">
+                        <span class="info-label">Duration of Visit:</span> ${attraction.durationOfVisit}
+                    </div>
+                `;
+            }
+            
+            if (attraction.rating) {
+                content += `
+                    <div class="info-detail">
+                        <span class="info-label">Rating:</span> ${attraction.rating}
+                    </div>
+                `;
+            }
+            
+            // Start links section
+            const links = [];
+            
+            // Add all possible links to an array
+            if (attraction.wikipedia) links.push(`<a href="${attraction.wikipedia}" target="_blank">Wikipedia</a>`);
+            if (attraction.youTube) links.push(`<a href="${attraction.youTube}" target="_blank">YouTube</a>`);
+            if (attraction.audioGuide) links.push(`<a href="${attraction.audioGuide}" target="_blank">Audio Guide</a>`);
+            if (attraction.tourBooking) links.push(`<a href="${attraction.tourBooking}" target="_blank">Tour Booking</a>`);
+            if (attraction.reservationLink && attraction.reservationLink !== 'N/A') links.push(`<a href="${attraction.reservationLink}" target="_blank">Reservations</a>`);
+            if (attraction.website) links.push(`<a href="${attraction.website}" target="_blank">Website</a>`);
+            if (attraction.googleMapsLink) links.push(`<a href="${attraction.googleMapsLink}" target="_blank">Google Maps</a>`);
+            
+            // Only add links section if there are links
+            if (links.length > 0) {
+                content += `
+                    <div class="info-links">
+                        ${links.join(' ')}
+                    </div>
+                `;
+            }
+            
+            infoContainer.innerHTML = content;
+        }
         
-        <div class="info-detail">
-            <span class="info-label">Address:</span> ${attraction.address || 'Not specified'}
-        </div>
-    `;
-    
-    // Add common details with fallbacks
-    if (attraction.openingHours) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Opening Hours:</span> ${attraction.openingHours}
-            </div>
-        `;
-    }
-    
-    // Handle different fee names
-    const fee = attraction.admissionFee || attraction.entryFee || '';
-    if (fee) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Admission:</span> ${fee}
-            </div>
-        `;
-    }
-    
-    if (attraction.bestTimeToVisit) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Best Time to Visit:</span> ${attraction.bestTimeToVisit}
-            </div>
-        `;
-    }
-    
-    if (attraction.durationOfVisit) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Duration of Visit:</span> ${attraction.durationOfVisit}
-            </div>
-        `;
-    }
-    
-    if (attraction.rating) {
-        content += `
-            <div class="info-detail">
-                <span class="info-label">Rating:</span> ${attraction.rating}
-            </div>
-        `;
-    }
-    
-    // Start links section
-    const links = [];
-    
-    // Add all possible links to an array
-    if (attraction.wikipedia) links.push(`<a href="${attraction.wikipedia}" target="_blank">Wikipedia</a>`);
-    if (attraction.youTube) links.push(`<a href="${attraction.youTube}" target="_blank">YouTube</a>`);
-    if (attraction.audioGuide) links.push(`<a href="${attraction.audioGuide}" target="_blank">Audio Guide</a>`);
-    if (attraction.tourBooking) links.push(`<a href="${attraction.tourBooking}" target="_blank">Tour Booking</a>`);
-    if (attraction.reservationLink && attraction.reservationLink !== 'N/A') links.push(`<a href="${attraction.reservationLink}" target="_blank">Reservations</a>`);
-    if (attraction.website) links.push(`<a href="${attraction.website}" target="_blank">Website</a>`);
-    if (attraction.googleMapsLink) links.push(`<a href="${attraction.googleMapsLink}" target="_blank">Google Maps</a>`);
-    
-    // Only add links section if there are links
-    if (links.length > 0) {
-        content += `
-            <div class="info-links">
-                ${links.join(' ')}
-            </div>
-        `;
-    }
-    
-    infoContainer.innerHTML = content;
-}
+        // Function to update map based on active filters
+        function updateMap() {
+            markers.forEach(marker => {
+                const category = marker.attractionData.category;
+                
+                if (activeFilters[category]) {
+                    // Show marker if category is active
+                    if (!map.hasLayer(marker)) {
+                        map.addLayer(marker);
+                    }
+                } else {
+                    // Hide marker if category is inactive
+                    if (map.hasLayer(marker)) {
+                        map.removeLayer(marker);
+                    }
+                }
+            });
+        }
         
-        // Add markers for all attractions
+        // Function to build filter UI
+        function buildFilterUI() {
+            const filterControls = document.getElementById('filter-controls');
+            filterControls.innerHTML = '';
+            
+            // Create filter toggles for each category
+            uniqueCategories.forEach(category => {
+                const config = categoryConfig[category] || { color: "#000000", icon: "📍" };
+                
+                // Create filter control
+                const filterControl = document.createElement('div');
+                filterControl.className = 'filter-control';
+                
+                // Create checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'filter-toggle';
+                checkbox.id = `filter-${category.replace(/\s+/g, '-').toLowerCase()}`;
+                checkbox.checked = activeFilters[category];
+                
+                // Create label
+                const label = document.createElement('label');
+                label.className = 'filter-label';
+                label.htmlFor = checkbox.id;
+                
+                // Create color indicator
+                const colorIndicator = document.createElement('span');
+                colorIndicator.className = 'color-indicator';
+                colorIndicator.style.backgroundColor = config.color;
+                
+                // Create icon
+                const icon = document.createElement('span');
+                icon.className = 'filter-icon';
+                icon.textContent = config.icon;
+                
+                // Create text
+                const text = document.createTextNode(category);
+                
+                // Assemble filter control
+                label.appendChild(colorIndicator);
+                label.appendChild(icon);
+                label.appendChild(text);
+                filterControl.appendChild(checkbox);
+                filterControl.appendChild(label);
+                
+                // Add event listener
+                checkbox.addEventListener('change', function() {
+                    activeFilters[category] = this.checked;
+                    updateMap();
+                    
+                    // Update toggle all button text
+                    updateToggleAllButton();
+                });
+                
+                filterControls.appendChild(filterControl);
+            });
+        }
+        
+        // Function to update toggle all button text
+        function updateToggleAllButton() {
+            const allActive = Object.values(activeFilters).every(status => status === true);
+            const allInactive = Object.values(activeFilters).every(status => status === false);
+            
+            const toggleAllBtn = document.getElementById('toggle-all');
+            
+            if (allActive) {
+                toggleAllBtn.textContent = 'Deselect All';
+            } else if (allInactive) {
+                toggleAllBtn.textContent = 'Select All';
+            } else {
+                toggleAllBtn.textContent = 'Select All';
+            }
+        }
+        
+        // Function to toggle all filters
+        function toggleAllFilters() {
+            const allActive = Object.values(activeFilters).every(status => status === true);
+            
+            // Toggle to opposite state
+            Object.keys(activeFilters).forEach(category => {
+                activeFilters[category] = !allActive;
+            });
+            
+            // Update UI
+            document.querySelectorAll('.filter-toggle').forEach(checkbox => {
+                checkbox.checked = !allActive;
+            });
+            
+            // Update map
+            updateMap();
+            
+            // Update button text
+            updateToggleAllButton();
+        }
+        
+        // Add event listener for toggle all button
+        document.getElementById('toggle-all').addEventListener('click', toggleAllFilters);
+        
+        // Initialize markers for all attractions
         attractions.forEach(attraction => {
             addMarker(attraction);
+        });
+        
+        // Build filter UI
+        buildFilterUI();
+        
+        // Make sure filter panel doesn't trigger map events
+        document.getElementById('filter-panel').addEventListener('mousedown', function(e) {
+            e.stopPropagation();
+        });
+        
+        document.getElementById('filter-panel').addEventListener('dblclick', function(e) {
+            e.stopPropagation();
         });
         
         // Clear selection when tapping the map (not a marker)
@@ -1540,6 +1769,30 @@
                     </div>
                 `;
             }
+        });
+        
+        // Make the filter panel draggable
+        const filterPanel = document.getElementById('filter-panel');
+        let isDragging = false;
+        let offsetX, offsetY;
+        
+        filterPanel.addEventListener('mousedown', function(e) {
+            if (e.target.classList.contains('filter-title')) {
+                isDragging = true;
+                offsetX = e.clientX - filterPanel.getBoundingClientRect().left;
+                offsetY = e.clientY - filterPanel.getBoundingClientRect().top;
+            }
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            filterPanel.style.left = (e.clientX - offsetX) + 'px';
+            filterPanel.style.top = (e.clientY - offsetY) + 'px';
+        });
+        
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
         });
     </script>
 </body>
