@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barcelona Attractions Map</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.css" />
     <style>
         body {
             margin: 0;
@@ -397,13 +396,6 @@
                 <!-- Search results will appear here -->
             </div>
         </div>
-        
-        <button id="location-btn" title="Show my location">📍</button>
-        <div id="route-panel">
-            <button class="route-btn" id="walking-btn" title="Walking route">🚶</button>
-            <button class="route-btn" id="cycling-btn" title="Cycling route">🚲</button>
-            <button class="route-btn" id="driving-btn" title="Driving route">🚗</button>
-        </div>
     </div>
     
     <div id="right-sidebar">
@@ -416,7 +408,6 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
     <script>
         // Define category colors and icons
         const categoryConfig = {
@@ -440,6 +431,9 @@
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
         
+        // We've removed the legend since we now have the filter panel with category information
+
+
         // Load attraction data
         const attractions = [
         {
@@ -1542,7 +1536,7 @@
     googleMapsLink: "https://maps.google.com/?q=41.3995,2.1665"
   },
         ];
-        
+       
         // Store markers for each location and active filters state
         const markers = [];
         const activeFilters = {};
@@ -1916,185 +1910,28 @@
             });
         });
         
-        // Add user location and routing functionality
-        let userMarker = null;
-        let userLocation = null;
-        let routingControl = null;
-        let selectedDestination = null;
-        let isLocationActive = false;
+        // Make the filter panel draggable
+        let isDragging = false;
+        let offsetX, offsetY;
         
-        const locationBtn = document.getElementById('location-btn');
-        const routePanel = document.getElementById('route-panel');
-        const walkingBtn = document.getElementById('walking-btn');
-        const cyclingBtn = document.getElementById('cycling-btn');
-        const drivingBtn = document.getElementById('driving-btn');
-        
-        // Location button click handler
-        locationBtn.addEventListener('click', function() {
-            if (isLocationActive) {
-                // Deactivate location tracking
-                isLocationActive = false;
-                locationBtn.classList.remove('active');
-                routePanel.classList.remove('visible');
-                
-                // Remove user marker if exists
-                if (userMarker) {
-                    map.removeLayer(userMarker);
-                    userMarker = null;
-                }
-                
-                // Remove routing if exists
-                if (routingControl) {
-                    map.removeControl(routingControl);
-                    routingControl = null;
-                }
-            } else {
-                // Activate location tracking
-                isLocationActive = true;
-                locationBtn.classList.add('active');
-                
-                // Request user's location
-                if (navigator.geolocation) {
-                    locationBtn.innerText = '⏳';
-                    
-                    navigator.geolocation.getCurrentPosition(
-                        function(position) {
-                            // Success callback
-                            userLocation = [position.coords.latitude, position.coords.longitude];
-                            
-                            // Create or update user marker
-                            if (userMarker) {
-                                userMarker.setLatLng(userLocation);
-                            } else {
-                                const userIcon = L.divIcon({
-                                    html: '<div style="background-color: #4a66a0; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; border: 2px solid white;">👤</div>',
-                                    className: '',
-                                    iconSize: [28, 28]
-                                });
-                                
-                                userMarker = L.marker(userLocation, {
-                                    icon: userIcon,
-                                    zIndexOffset: 1000
-                                }).addTo(map);
-                            }
-                            
-                            // Center map on user location
-                            map.setView(userLocation, 15);
-                            
-                            // Show routing panel if destination is selected
-                            if (selectedDestination) {
-                                routePanel.classList.add('visible');
-                            }
-                            
-                            locationBtn.innerText = '📍';
-                        },
-                        function(error) {
-                            // Error callback
-                            isLocationActive = false;
-                            locationBtn.classList.remove('active');
-                            locationBtn.innerText = '📍';
-                            
-                            let errorMsg = '';
-                            switch(error.code) {
-                                case error.PERMISSION_DENIED:
-                                    errorMsg = "Location access denied. Please enable location services.";
-                                    break;
-                                case error.POSITION_UNAVAILABLE:
-                                    errorMsg = "Location information unavailable.";
-                                    break;
-                                case error.TIMEOUT:
-                                    errorMsg = "Location request timed out.";
-                                    break;
-                                default:
-                                    errorMsg = "An unknown error occurred.";
-                            }
-                            
-                            alert(errorMsg);
-                        },
-                        {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 0
-                        }
-                    );
-                } else {
-                    alert("Geolocation is not supported by this browser.");
-                    isLocationActive = false;
-                    locationBtn.classList.remove('active');
-                }
+        filterPanel.addEventListener('mousedown', function(e) {
+            if (e.target.classList.contains('filter-title')) {
+                isDragging = true;
+                offsetX = e.clientX - filterPanel.getBoundingClientRect().left;
+                offsetY = e.clientY - filterPanel.getBoundingClientRect().top;
             }
         });
         
-        // Function to create route
-        function createRoute(transportMode) {
-            if (!userLocation || !selectedDestination) {
-                alert("Both your location and a destination are required for routing.");
-                return;
-            }
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
             
-            // Remove existing route if any
-            if (routingControl) {
-                map.removeControl(routingControl);
-            }
-            
-            // Create new route
-            routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(userLocation[0], userLocation[1]),
-                    L.latLng(selectedDestination.latitude, selectedDestination.longitude)
-                ],
-                routeWhileDragging: false,
-                showAlternatives: false,
-                fitSelectedRoutes: true,
-                lineOptions: {
-                    styles: [
-                        {color: '#4a66a0', opacity: 0.8, weight: 6},
-                        {color: 'white', opacity: 0.3, weight: 4}
-                    ]
-                },
-                router: L.Routing.osrmv1({
-                    serviceUrl: 'https://router.project-osrm.org/route/v1',
-                    profile: transportMode
-                }),
-                collapsible: true,
-                createMarker: function() { return null; } // Don't create default markers
-            }).addTo(map);
-        }
-        
-        // Route type button handlers
-        walkingBtn.addEventListener('click', function() {
-            createRoute('foot');
+            filterPanel.style.left = (e.clientX - offsetX) + 'px';
+            filterPanel.style.top = (e.clientY - offsetY) + 'px';
         });
         
-        cyclingBtn.addEventListener('click', function() {
-            createRoute('bike');
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
         });
-        
-        drivingBtn.addEventListener('click', function() {
-            createRoute('car');
-        });
-        
-        // Update marker click to set selected destination
-        function updateMarkerClickHandler() {
-            markers.forEach(marker => {
-                // Remove any existing click handlers
-                marker.off('click');
-                
-                // Add new click handler
-                marker.on('click', function() {
-                    // Show location info
-                    showLocationInfo(marker.attractionData);
-                    
-                    // Set as selected destination
-                    selectedDestination = marker.attractionData.coordinates;
-                    
-                    // Show routing panel if location is active
-                    if (isLocationActive && userLocation) {
-                        routePanel.classList.add('visible');
-                    }
-                });
-            });
-        }
     </script>
 </body>
 </html>
