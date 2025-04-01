@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barcelona Attractions Map</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.css" />
     <style>
         body {
             margin: 0;
@@ -22,11 +22,9 @@
             position: relative;
         }
         
-        /* Toggle button for filter panel */
-        #filter-toggle-btn {
+        /* Toggle buttons for panels */
+        .control-btn {
             position: absolute;
-            top: 10px;
-            left: 10px;
             z-index: 1001;
             background: white;
             width: 40px;
@@ -41,8 +39,18 @@
             font-size: 20px;
         }
         
-        #filter-toggle-btn:hover {
+        .control-btn:hover {
             background: #f0f0f0;
+        }
+        
+        #filter-toggle-btn {
+            top: 10px;
+            left: 10px;
+        }
+        
+        #search-toggle-btn {
+            top: 10px;
+            left: 60px;
         }
         
         #right-sidebar {
@@ -168,25 +176,80 @@
         }
 
         /* Filter panel styles */
-        #filter-panel {
+        .control-panel {
             position: absolute;
             top: 10px;
-            left: 60px;
             z-index: 1000;
             background: white;
             padding: 10px;
             border-radius: 4px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            max-width: 220px;
             max-height: 80vh;
             overflow-y: auto;
             transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s;
         }
         
-        #filter-panel.hidden {
-            transform: translateX(-300px);
+        .control-panel.hidden {
             opacity: 0;
             visibility: hidden;
+        }
+        
+        #filter-panel {
+            left: 110px;
+            max-width: 220px;
+        }
+        
+        #filter-panel.hidden {
+            transform: translateX(-300px);
+        }
+        
+        #search-panel {
+            left: 110px;
+            width: 250px;
+        }
+        
+        #search-panel.hidden {
+            transform: translateY(-100px);
+        }
+        
+        #search-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        
+        #search-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .search-result {
+            padding: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .search-result:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .search-result-name {
+            font-weight: bold;
+        }
+        
+        .search-result-category {
+            font-size: 0.8em;
+            color: #666;
+        }
+        
+        .no-results {
+            padding: 10px;
+            color: #666;
+            font-style: italic;
+            text-align: center;
         }
         
         .filter-control {
@@ -314,8 +377,10 @@
 <body>
     <div id="map-container">
         <div id="map"></div>
-        <button id="filter-toggle-btn" title="Toggle Filter Panel">🔍</button>
-        <div id="filter-panel">
+        <button id="filter-toggle-btn" class="control-btn" title="Toggle Filter Panel">⚙️</button>
+        <button id="search-toggle-btn" class="control-btn" title="Toggle Search Panel">🔍</button>
+        
+        <div id="filter-panel" class="control-panel">
             <div class="filter-title">
                 Filter Categories
                 <button id="toggle-all" class="toggle-all-btn">Select All</button>
@@ -323,6 +388,21 @@
             <div id="filter-controls">
                 <!-- Filter checkboxes will be added here dynamically -->
             </div>
+        </div>
+        
+        <div id="search-panel" class="control-panel hidden">
+            <div class="filter-title">Search Attractions</div>
+            <input type="text" id="search-input" placeholder="Search by name...">
+            <div id="search-results">
+                <!-- Search results will appear here -->
+            </div>
+        </div>
+        
+        <button id="location-btn" title="Show my location">📍</button>
+        <div id="route-panel">
+            <button class="route-btn" id="walking-btn" title="Walking route">🚶</button>
+            <button class="route-btn" id="cycling-btn" title="Cycling route">🚲</button>
+            <button class="route-btn" id="driving-btn" title="Driving route">🚗</button>
         </div>
     </div>
     
@@ -336,6 +416,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
     <script>
         // Define category colors and icons
         const categoryConfig = {
@@ -358,9 +439,7 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-
         
-
         // Load attraction data
         const attractions = [
         {
@@ -1463,7 +1542,7 @@
     googleMapsLink: "https://maps.google.com/?q=41.3995,2.1665"
   },
         ];
-       
+        
         // Store markers for each location and active filters state
         const markers = [];
         const activeFilters = {};
@@ -1728,47 +1807,294 @@
             }
         });
         
-        // Toggle filter panel visibility
+        // Toggle panels visibility
         const filterPanel = document.getElementById('filter-panel');
+        const searchPanel = document.getElementById('search-panel');
         const filterToggleBtn = document.getElementById('filter-toggle-btn');
-        let isPanelVisible = true;
+        const searchToggleBtn = document.getElementById('search-toggle-btn');
         
+        // By default, filter panel is hidden and search panel is hidden
+        filterPanel.classList.add('hidden');
+        
+        // Toggle filter panel
         filterToggleBtn.addEventListener('click', function() {
-            isPanelVisible = !isPanelVisible;
+            const isVisible = !filterPanel.classList.contains('hidden');
             
-            if (isPanelVisible) {
-                filterPanel.classList.remove('hidden');
-                filterToggleBtn.innerHTML = '🔍';
-                filterToggleBtn.title = 'Hide Filter Panel';
-            } else {
+            if (isVisible) {
+                // Hide filter panel
                 filterPanel.classList.add('hidden');
-                filterToggleBtn.innerHTML = '⚙️';
                 filterToggleBtn.title = 'Show Filter Panel';
+            } else {
+                // Show filter panel, hide search panel
+                filterPanel.classList.remove('hidden');
+                searchPanel.classList.add('hidden');
+                filterToggleBtn.title = 'Hide Filter Panel';
             }
         });
         
-        // Make the filter panel draggable
-        let isDragging = false;
-        let offsetX, offsetY;
-        
-        filterPanel.addEventListener('mousedown', function(e) {
-            if (e.target.classList.contains('filter-title')) {
-                isDragging = true;
-                offsetX = e.clientX - filterPanel.getBoundingClientRect().left;
-                offsetY = e.clientY - filterPanel.getBoundingClientRect().top;
-            }
-        });
-        
-        document.addEventListener('mousemove', function(e) {
-            if (!isDragging) return;
+        // Toggle search panel
+        searchToggleBtn.addEventListener('click', function() {
+            const isVisible = !searchPanel.classList.contains('hidden');
             
-            filterPanel.style.left = (e.clientX - offsetX) + 'px';
-            filterPanel.style.top = (e.clientY - offsetY) + 'px';
+            if (isVisible) {
+                // Hide search panel
+                searchPanel.classList.add('hidden');
+                searchToggleBtn.title = 'Show Search Panel';
+            } else {
+                // Show search panel, hide filter panel
+                searchPanel.classList.remove('hidden');
+                filterPanel.classList.add('hidden');
+                searchToggleBtn.title = 'Hide Search Panel';
+                // Focus the search input
+                document.getElementById('search-input').focus();
+            }
         });
         
-        document.addEventListener('mouseup', function() {
-            isDragging = false;
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            
+            if (query.length < 2) {
+                searchResults.innerHTML = '<div class="no-results">Type at least 2 characters to search</div>';
+                return;
+            }
+            
+            // Filter attractions by name
+            const results = attractions.filter(attraction => 
+                attraction.name.toLowerCase().includes(query)
+            );
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">No attractions found</div>';
+                return;
+            }
+            
+            // Display results
+            let resultsHTML = '';
+            results.forEach(attraction => {
+                const config = categoryConfig[attraction.category] || { color: "#000000", icon: "📍" };
+                
+                resultsHTML += `
+                    <div class="search-result" data-lat="${attraction.coordinates.latitude}" data-lng="${attraction.coordinates.longitude}">
+                        <div class="search-result-name">${attraction.name}</div>
+                        <div class="search-result-category">
+                            <span style="color: ${config.color}">${config.icon}</span> 
+                            ${attraction.category}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            searchResults.innerHTML = resultsHTML;
+            
+            // Add click handlers to results
+            document.querySelectorAll('.search-result').forEach(result => {
+                result.addEventListener('click', function() {
+                    const lat = parseFloat(this.dataset.lat);
+                    const lng = parseFloat(this.dataset.lng);
+                    
+                    // Find the marker for this attraction
+                    const marker = markers.find(m => 
+                        m.attractionData.coordinates.latitude === lat && 
+                        m.attractionData.coordinates.longitude === lng
+                    );
+                    
+                    if (marker) {
+                        // Pan map to marker
+                        map.setView([lat, lng], 16);
+                        
+                        // Show info for this attraction
+                        showLocationInfo(marker.attractionData);
+                        
+                        // Optional: hide search panel after selection
+                        searchPanel.classList.add('hidden');
+                    }
+                });
+            });
         });
+        
+        // Add user location and routing functionality
+        let userMarker = null;
+        let userLocation = null;
+        let routingControl = null;
+        let selectedDestination = null;
+        let isLocationActive = false;
+        
+        const locationBtn = document.getElementById('location-btn');
+        const routePanel = document.getElementById('route-panel');
+        const walkingBtn = document.getElementById('walking-btn');
+        const cyclingBtn = document.getElementById('cycling-btn');
+        const drivingBtn = document.getElementById('driving-btn');
+        
+        // Location button click handler
+        locationBtn.addEventListener('click', function() {
+            if (isLocationActive) {
+                // Deactivate location tracking
+                isLocationActive = false;
+                locationBtn.classList.remove('active');
+                routePanel.classList.remove('visible');
+                
+                // Remove user marker if exists
+                if (userMarker) {
+                    map.removeLayer(userMarker);
+                    userMarker = null;
+                }
+                
+                // Remove routing if exists
+                if (routingControl) {
+                    map.removeControl(routingControl);
+                    routingControl = null;
+                }
+            } else {
+                // Activate location tracking
+                isLocationActive = true;
+                locationBtn.classList.add('active');
+                
+                // Request user's location
+                if (navigator.geolocation) {
+                    locationBtn.innerText = '⏳';
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            // Success callback
+                            userLocation = [position.coords.latitude, position.coords.longitude];
+                            
+                            // Create or update user marker
+                            if (userMarker) {
+                                userMarker.setLatLng(userLocation);
+                            } else {
+                                const userIcon = L.divIcon({
+                                    html: '<div style="background-color: #4a66a0; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; border: 2px solid white;">👤</div>',
+                                    className: '',
+                                    iconSize: [28, 28]
+                                });
+                                
+                                userMarker = L.marker(userLocation, {
+                                    icon: userIcon,
+                                    zIndexOffset: 1000
+                                }).addTo(map);
+                            }
+                            
+                            // Center map on user location
+                            map.setView(userLocation, 15);
+                            
+                            // Show routing panel if destination is selected
+                            if (selectedDestination) {
+                                routePanel.classList.add('visible');
+                            }
+                            
+                            locationBtn.innerText = '📍';
+                        },
+                        function(error) {
+                            // Error callback
+                            isLocationActive = false;
+                            locationBtn.classList.remove('active');
+                            locationBtn.innerText = '📍';
+                            
+                            let errorMsg = '';
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    errorMsg = "Location access denied. Please enable location services.";
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMsg = "Location information unavailable.";
+                                    break;
+                                case error.TIMEOUT:
+                                    errorMsg = "Location request timed out.";
+                                    break;
+                                default:
+                                    errorMsg = "An unknown error occurred.";
+                            }
+                            
+                            alert(errorMsg);
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    alert("Geolocation is not supported by this browser.");
+                    isLocationActive = false;
+                    locationBtn.classList.remove('active');
+                }
+            }
+        });
+        
+        // Function to create route
+        function createRoute(transportMode) {
+            if (!userLocation || !selectedDestination) {
+                alert("Both your location and a destination are required for routing.");
+                return;
+            }
+            
+            // Remove existing route if any
+            if (routingControl) {
+                map.removeControl(routingControl);
+            }
+            
+            // Create new route
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(userLocation[0], userLocation[1]),
+                    L.latLng(selectedDestination.latitude, selectedDestination.longitude)
+                ],
+                routeWhileDragging: false,
+                showAlternatives: false,
+                fitSelectedRoutes: true,
+                lineOptions: {
+                    styles: [
+                        {color: '#4a66a0', opacity: 0.8, weight: 6},
+                        {color: 'white', opacity: 0.3, weight: 4}
+                    ]
+                },
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'https://router.project-osrm.org/route/v1',
+                    profile: transportMode
+                }),
+                collapsible: true,
+                createMarker: function() { return null; } // Don't create default markers
+            }).addTo(map);
+        }
+        
+        // Route type button handlers
+        walkingBtn.addEventListener('click', function() {
+            createRoute('foot');
+        });
+        
+        cyclingBtn.addEventListener('click', function() {
+            createRoute('bike');
+        });
+        
+        drivingBtn.addEventListener('click', function() {
+            createRoute('car');
+        });
+        
+        // Update marker click to set selected destination
+        function updateMarkerClickHandler() {
+            markers.forEach(marker => {
+                // Remove any existing click handlers
+                marker.off('click');
+                
+                // Add new click handler
+                marker.on('click', function() {
+                    // Show location info
+                    showLocationInfo(marker.attractionData);
+                    
+                    // Set as selected destination
+                    selectedDestination = marker.attractionData.coordinates;
+                    
+                    // Show routing panel if location is active
+                    if (isLocationActive && userLocation) {
+                        routePanel.classList.add('visible');
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>
