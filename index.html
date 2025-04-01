@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,6 +20,29 @@
             flex: 1;
             height: 100%;
             position: relative;
+        }
+        
+        /* Toggle button for filter panel */
+        #filter-toggle-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border: none;
+            font-size: 20px;
+        }
+        
+        #filter-toggle-btn:hover {
+            background: #f0f0f0;
         }
         
         #right-sidebar {
@@ -147,7 +171,7 @@
         #filter-panel {
             position: absolute;
             top: 10px;
-            left: 10px;
+            left: 60px;
             z-index: 1000;
             background: white;
             padding: 10px;
@@ -156,6 +180,13 @@
             max-width: 220px;
             max-height: 80vh;
             overflow-y: auto;
+            transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s;
+        }
+        
+        #filter-panel.hidden {
+            transform: translateX(-300px);
+            opacity: 0;
+            visibility: hidden;
         }
         
         .filter-control {
@@ -283,6 +314,7 @@
 <body>
     <div id="map-container">
         <div id="map"></div>
+        <button id="filter-toggle-btn" title="Toggle Filter Panel">🔍</button>
         <div id="filter-panel">
             <div class="filter-title">
                 Filter Categories
@@ -326,583 +358,500 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-        
+
         
 
         // Load attraction data
         const attractions = [
         {
-      "name": "Sagrada Familia",
-      "category": "Art",
-      "description": "The Basílica i Temple Expiatori de la Sagrada Família, designed by Antoni Gaudí, is the largest unfinished Catholic church globally, with construction starting on March 19, 1882, and expected completion by 2026. It features a capacity of 9,000, a length of 90 m (300 ft), width of 60 m (200 ft), and a planned spire height of 172.5 m (570 ft), with 13 of 18 spires already built as of 2023.",
-      "coordinates": {
-        "latitude": 41.40369,
-        "longitude": 2.17445
-      },
-      "address": "Carrer de Mallorca, 401, 08013 Barcelona, Spain",
-      "openingHours": "Typically from 9:00 AM to 6:00 PM, subject to change; check official website for updates.",
-      "admissionFee": "€26 (basic ticket); book your ticket at https://example.com/sagrada-familia-tickets",
-      "bestTimeToVisit": "Early morning or late afternoon to avoid crowds, especially given its popularity with over 3 million annual visitors.",
-      "durationOfVisit": "Recommended 2-3 hours to explore the interiors and museum.",
-      "rating": "4.7 out of 5, based on 129,992 reviews on TripAdvisor as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Sagrada_Familia",
-      "youTube": "https://youtube.com/example-sagrada-familia-tour",
-      "audioGuide": "Available via the official Sagrada Familia app, in 19 languages, with standard (45 minutes) and express (25 minutes) versions.",
-      "tourBooking": "Book guided tours with skip-the-line access at https://viator.com/sagrada-familia-tours"
-    },
-    {
-      "name": "Park Guell",
-      "category": "Art",
-      "description": "A public park system designed by Antoni Gaudí, featuring gardens and architectonic elements, built between 1900 and 1914, and opened to the public in 1926. It spans 17.18 hectares and was declared a UNESCO World Heritage Site in 1984.",
-      "coordinates": {
-        "latitude": 41.422,
-        "longitude": 2.1552
-      },
-      "address": "Carrer d'Olot, 7, 08024 Barcelona, Spain",
-      "openingHours": "Typically 8:00 AM to 9:00 PM; check official website for updates.",
-      "admissionFee": "Varies; book tickets at https://example.com/park-guell-tickets",
-      "bestTimeToVisit": "Early morning or late afternoon to enjoy the views and avoid peak crowds.",
-      "durationOfVisit": "Recommended 1-2 hours to explore the main areas and Gaudí House Museum.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Park_Guell",
-      "youTube": "https://youtube.com/example-park-guell-tour",
-      "audioGuide": "Available via the official Park Guell app or during guided tours.",
-      "tourBooking": "Book tours at https://getyourguide.com/park-guell-tours"
-    },
-    {
-      "name": "Camp Nou Stadium",
-      "category": "Entertainment",
-      "description": "Home of FC Barcelona, this stadium seats 99,354 and offers guided tours including the museum, dressing rooms, and pitch, making it a pilgrimage site for football fans.",
-      "coordinates": {
-        "latitude": 41.38299,
-        "longitude": 2.12222
-      },
-      "address": "Carrer d'Aristides Maillol, 12, 08028 Barcelona, Spain",
-      "openingHours": "Varies; check official website for tour schedules.",
-      "admissionFee": "Varies; book at https://example.com/camp-nou-tickets",
-      "bestTimeToVisit": "During non-match days for a quieter tour experience.",
-      "durationOfVisit": "Approximately 1 hour for the standard tour.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Camp_Nou",
-      "youTube": "https://youtube.com/example-camp-nou-tour",
-      "audioGuide": "Included in guided tours.",
-      "tourBooking": "Book at https://fcbarcelona.com/tours"
-    },
-    {
-      "name": "Casa Batlló",
-      "category": "Art",
-      "description": "Designed by Gaudí, this residential building features a marine-inspired facade and was built between 1904 and 1906, a UNESCO site known for its fairy-tale appearance.",
-      "coordinates": {
-        "latitude": 41.3917,
-        "longitude": 2.16503
-      },
-      "address": "Passeig de Gràcia, 43, 08007 Barcelona, Spain",
-      "openingHours": "Typically 9:00 AM to 9:00 PM; check official website for updates.",
-      "admissionFee": "€29; book at https://example.com/casa-batllo-tickets",
-      "bestTimeToVisit": "Early morning or late afternoon to avoid crowds.",
-      "durationOfVisit": "Approximately 1 hour.",
-      "rating": "4.7 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Casa_Batlló",
-      "youTube": "https://youtube.com/example-casa-batllo-tour",
-      "audioGuide": "Available via official app or during visit.",
-      "tourBooking": "Book at https://example.com/casa-batllo-tours"
-    },
-    {
-      "name": "La Pedrera (Casa Milà)",
-      "category": "Art",
-      "description": "Another Gaudí masterpiece, built 1905-1910, known for its stone facade and rooftop sculptures, a UNESCO site.",
-      "coordinates": {
-        "latitude": 41.39507,
-        "longitude": 2.16200
-      },
-      "address": "Passeig de Gràcia, 92, 08008 Barcelona, Spain",
-      "openingHours": "Typically 9:00 AM to 8:00 PM; check official website for updates.",
-      "admissionFee": "Varies; book at https://example.com/la-pedrera-tickets",
-      "bestTimeToVisit": "Early morning or late afternoon.",
-      "durationOfVisit": "Approximately 1 hour.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/La_Pedrera",
-      "youTube": "https://youtube.com/example-la-pedrera-tour",
-      "audioGuide": "Available via official app or during visit.",
-      "tourBooking": "Book at https://example.com/la-pedrera-tours"
-    },
-    {
-      "name": "Picasso Museum",
-      "category": "Art",
-      "description": "Houses over 4,000 works by Pablo Picasso, located in five Gothic palaces in El Born, focusing on his early career.",
-      "coordinates": {
-        "latitude": 41.3839,
-        "longitude": 2.1814
-      },
-      "address": "Carrer de Montcada, 15-23, 08003 Barcelona, Spain",
-      "openingHours": "Typically 9:00 AM to 7:00 PM; check official website for updates.",
-      "admissionFee": "Varies; book at https://example.com/picasso-museum-tickets",
-      "bestTimeToVisit": "Early morning or late afternoon.",
-      "durationOfVisit": "Approximately 1-2 hours.",
-      "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Picasso_Museum,_Barcelona",
-      "youTube": "https://youtube.com/example-picasso-museum-tour",
-      "audioGuide": "Available via official app or during visit.",
-      "tourBooking": "Book at https://example.com/picasso-museum-tours"
-    },
-    {
-      "name": "Barcelona Cathedral",
-      "category": "Historical",
-      "description": "A Gothic cathedral dedicated to the Holy Cross and Saint Eulalia, with a cloister featuring 13 geese, built in the 13th-15th centuries.",
-      "coordinates": {
-        "latitude": 41.383333,
-        "longitude": 2.178333
-      },
-      "address": "Plaça de la Catedral, s/n, 08002 Barcelona, Spain",
-      "openingHours": "Typically 8:00 AM to 7:00 PM; check official website for updates.",
-      "admissionFee": "Free, donations welcome.",
-      "bestTimeToVisit": "Early morning or late afternoon.",
-      "durationOfVisit": "Approximately 1 hour.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Barcelona_Cathedral",
-      "youTube": "https://youtube.com/example-barcelona-cathedral-tour",
-      "audioGuide": "Available via various apps or websites.",
-      "tourBooking": "Book guided tours at https://example.com/barcelona-cathedral-tours"
-    },
-    {
-      "name": "Palau de la Musica Catalana",
-      "category": "Historical",
-      "description": "A Modernist concert hall, UNESCO-listed, opened in 1908, seating 2,200, known for its stained glass and mosaics.",
-      "coordinates": {
-        "latitude": 41.3856,
-        "longitude": 2.1764
-      },
-      "address": "Carrer de Sant Pere Més Alt, 11, 08002 Barcelona, Spain",
-      "openingHours": "Varies; check official website for concert and tour schedules.",
-      "admissionFee": "Varies for concerts and tours.",
-      "bestTimeToVisit": "During guided tours or concerts.",
-      "durationOfVisit": "Approximately 1 hour for tours.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Palau_de_la_Musica_Catalana",
-      "youTube": "https://youtube.com/example-palau-musica-tour",
-      "audioGuide": "Available during tours.",
-      "tourBooking": "Book at https://example.com/palau-musica-tours"
-    },
-    {
-      "name": "La Rambla",
-      "category": "Unique Places",
-      "description": "A tree-lined pedestrian boulevard, known for flower stalls, street performers, and historic buildings like the Liceu Theater, always bustling with activity.",
-      "coordinates": {
-        "latitude": 41.385,
-        "longitude": 2.176667
-      },
-      "address": "La Rambla, Barcelona, Spain",
-      "openingHours": "Always open.",
-      "admissionFee": "Free.",
-      "bestTimeToVisit": "Late afternoon or evening for the vibrant atmosphere.",
-      "durationOfVisit": "Variable, depending on exploration.",
-      "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/La_Rambla,_Barcelona",
-      "youTube": "https://youtube.com/example-la-rambla-tour",
-      "audioGuide": "Available via various apps or websites.",
-      "tourBooking": "Book guided walks at https://getyourguide.com/la-rambla-tours"
-    },
-    {
-      "name": "Boqueria Market",
-      "category": "Historical",
-      "description": "A central fresh-produce market since 1836, housed in a Modernist building, offering a sensory experience with its colors, smells, and sounds.",
-      "coordinates": {
-        "latitude": 41.3839,
-        "longitude": 2.1733
-      },
-      "address": "La Rambla, 91, 08001 Barcelona, Spain",
-      "openingHours": "Typically 8:00 AM to 8:30 PM; check official website for updates.",
-      "admissionFee": "Free.",
-      "bestTimeToVisit": "Early morning for the freshest produce.",
-      "durationOfVisit": "Approximately 1 hour.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Boqueria_Market",
-      "youTube": "https://youtube.com/example-boqueria-market-tour",
-      "audioGuide": "Available via various apps or websites.",
-      "tourBooking": "Book market tours at https://getyourguide.com/boqueria-market-tours"
-    },
-    {
-      "name": "Magic Fountain of Montjuïc",
-      "category": "Entertainment",
-      "description": "An Art Deco fountain built for the 1929 World Exhibition, known for its light and music shows, held Thursday to Sunday in summer and Friday to Saturday off-season.",
-      "coordinates": {
-        "latitude": 41.372222,
-        "longitude": 2.151389
-      },
-      "address": "Avinguda de la Reina Maria Cristina, s/n, 08004 Barcelona, Spain",
-      "openingHours": "Evening shows; check official website for schedule.",
-      "admissionFee": "Free.",
-      "bestTimeToVisit": "During scheduled shows for the full experience.",
-      "durationOfVisit": "Approximately 30 minutes per show.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Magic_Fountain_of_Montjuïc",
-      "youTube": "https://youtube.com/example-magic-fountain-show"
-    },
-    {
-      "name": "MNAC (Museu Nacional d'Art de Catalunya)",
-      "category": "Art",
-      "description": "Located in the Palau Nacional, built for the 1929 World Exhibition, it houses an exceptional collection of Catalan art from the 10th to 20th centuries, including European Renaissance and Baroque art.",
-      "coordinates": {
-        "latitude": 41.366533,
-        "longitude": 2.155
-      },
-      "address": "Carrer del Mirador del Palau Nacional, s/n, 08038 Barcelona, Spain",
-      "openingHours": "Typically 10:00 AM to 6:00 PM; check official website for updates.",
-      "admissionFee": "€12; book at https://example.com/mnac-tickets",
-      "bestTimeToVisit": "Midweek mornings for fewer crowds.",
-      "durationOfVisit": "2-3 hours.",
-      "rating": "4.6 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Museu_Nacional_d'Art_de_Catalunya",
-      "youTube": "https://youtube.com/example-mnac-tour",
-      "audioGuide": "Available during guided tours.",
-      "tourBooking": "Book at https://example.com/mnac-tours"
-    },
-    {
-      "name": "Poble Espanyo",
-      "category": "Unique Places",
-      "description": "A village representing different regions of Spain, built for the 1929 World Fair, with traditional architecture and shops.",
-      "coordinates": {
-        "latitude": 41.3672,
-        "longitude": 2.1594
-      },
-      "address": "Avinguda de la Reina Maria Cristina, s/n, 08004 Barcelona, Spain",
-      "openingHours": "10:00 AM - 8:00 PM; check official website for updates.",
-      "admissionFee": "Varies; book at https://example.com/poble-espanyo-tickets",
-      "bestTimeToVisit": "Late afternoon for fewer crowds.",
-      "durationOfVisit": "1-2 hours.",
-      "rating": "4.0 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Poble_Espanyo",
-      "youTube": "https://youtube.com/example-poble-espanyo-tour",
-      "audioGuide": "Available during guided tours.",
-      "tourBooking": "Book at https://example.com/poble-espanyo-tours"
-    },
-    {
-      "name": "Santa Maria del Mar",
-      "category": "Historical",
-      "description": "A beautiful Gothic church in El Born, ideal for history enthusiasts, built between 1329 and 1383.",
-      "coordinates": {
-        "latitude": 41.3861,
-        "longitude": 2.1842
-      },
-      "address": "Plaça de Santa Maria, 1, 08003 Barcelona, Spain",
-      "openingHours": "9:00 AM - 6:00 PM; check official website for updates.",
-      "admissionFee": "Free, donations welcome.",
-      "bestTimeToVisit": "Early morning or late afternoon to avoid crowds.",
-      "durationOfVisit": "Approximately 1 hour.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Santa_Maria_del_Mar",
-      "youTube": "https://youtube.com/example-santa-maria-del-mar-tour"
-    },
-    {
-      "name": "Fundacio Joan Mirò",
-      "category": "Art",
-      "description": "Dedicated to the artist Joan Mirò, with abstract and surrealist works, housed in a building designed by Josep Lluís Sert.",
-      "coordinates": {
-        "latitude": 41.3722,
-        "longitude": 2.1594
-      },
-      "address": "Carrer de Montjuïc, 17-21, 08038 Barcelona, Spain",
-      "openingHours": "10:00 AM - 6:00 PM (closed Mondays); check official website for updates.",
-      "admissionFee": "Varies; book at https://example.com/fundacio-joan-miro-tickets",
-      "bestTimeToVisit": "Morning, midweek for fewer crowds.",
-      "durationOfVisit": "1-2 hours.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Fundacio_Joan_Mirò",
-      "youTube": "https://youtube.com/example-fundacio-joan-miro-tour",
-      "audioGuide": "Available during guided tours or via the official app.",
-      "tourBooking": "Book at https://example.com/fundacio-joan-miro-tours"
-    },
-    {
-      "name": "Parc de la Ciutadella",
-      "category": "Nature",
-      "description": "A large urban park with a lake, zoo, and the Catalan Parliament, ideal for relaxation and recreation.",
-      "coordinates": {
-        "latitude": 41.3800,
-        "longitude": 2.1850
-      },
-      "address": "Passeig de Pujades, s/n, 08003 Barcelona, Spain",
-      "openingHours": "10:00 AM - 10:00 PM; check official website for updates.",
-      "admissionFee": "Free entry.",
-      "bestTimeToVisit": "Any daylight hours, preferably morning or late afternoon to avoid peak crowds.",
-      "durationOfVisit": "Variable, depending on exploration.",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_la_Ciutadella",
-      "youTube": "https://youtube.com/example-parc-ciutadella-tour"
-    },
-    {
-      "name": "Tibidabo Mountain",
-      "category": "Amusement Park",
-      "description": "A historic amusement park atop Mount Tibidabo with rides, stunning views, and a unique retro charm.",
-      "coordinates": {
-        "latitude": 41.4167,
-        "longitude": 2.1167
-      },
-      "address": "Plaça del Tibidabo, 3-4, 08035 Barcelona, Spain",
-      "openingHours": "Varies by season; check official website for updates.",
-      "admissionFee": "€35 (full access); book at https://example.com/tibidabo-tickets",
-      "bestTimeToVisit": "Weekdays to avoid crowds, spring or autumn for pleasant weather.",
-      "durationOfVisit": "Variable, depending on the number of rides and activities chosen.",
-      "rating": "4.0 out of 5, based on TripAdvisor reviews as of March 2025.",
-      "wikipedia": "https://en.wikipedia.org/wiki/Tibidabo_Amusement_Park"
-    },
-    {
-      "name": "Arc de Triomf",
-      "category": "Historical",
-      "description": "A red-brick triumphal arch built for the 1888 World Fair, featuring Moorish and neo-Mudéjar styles, free to visit and ideal for photos.",
-      "coordinates": {
-        "latitude": 41.3910,
-        "longitude": 2.1810
-      },
-      "address": "Passeig de Lluís Companys, 08003 Barcelona, Spain",
-      "openingHours": "24/7",
-      "admissionFee": "Free",
-      "bestTimeToVisit": "Morning, spring for fewer crowds",
-      "durationOfVisit": "Approximately 30 minutes",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Arc_de_Triomf",
-      "youTube": "https://youtube.com/example-arc-de-triomf-tour"
-    },
-    {
-      "name": "Plaça d'Espanya",
-      "category": "Unique Places",
-      "description": "A large square with fountains, the Venetian Towers, and views towards Montjuïc, free to explore and a hub for events.",
-      "coordinates": {
-        "latitude": 41.3730,
-        "longitude": 2.1490
-      },
-      "address": "Plaça d'Espanya, 08004 Barcelona, Spain",
-      "openingHours": "24/7",
-      "admissionFee": "Free",
-      "bestTimeToVisit": "Evening, summer for illuminated fountains",
-      "durationOfVisit": "Approximately 1 hour",
-      "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Plaça_d'Espanya",
-      "youTube": "https://youtube.com/example-placa-despanya-tour"
-    },
-    {
-      "name": "Museu del Disseny de Barcelona (Exterior)",
-      "category": "Art",
-      "description": "While the museum has an entry fee, the exterior and surrounding Plaça de les Glòries Catalanes are free, offering modern architecture to admire.",
-      "coordinates": {
-        "latitude": 41.3830,
-        "longitude": 2.1760
-      },
-      "address": "Plaça de les Glòries Catalanes, 37, 08018 Barcelona, Spain",
-      "openingHours": "24/7 (exterior)",
-      "admissionFee": "Free (exterior)",
-      "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
-      "durationOfVisit": "Approximately 30 minutes",
-      "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Museu_del_Disseny_de_Barcelona",
-      "youTube": "https://youtube.com/example-museu-disseny-exterior-tour"
-    },
-    {
-      "name": "Gran Teatre del Liceu (Facade)",
-      "category": "Historical",
-      "description": "The facade of this historic opera house on La Rambla is free to view, offering a glimpse of its cultural significance.",
-      "coordinates": {
-        "latitude": 41.3800,
-        "longitude": 2.1740
-      },
-      "address": "La Rambla, 51-59, 08002 Barcelona, Spain",
-      "openingHours": "24/7 (exterior)",
-      "admissionFee": "Free (exterior)",
-      "bestTimeToVisit": "Morning, spring for fewer crowds",
-      "durationOfVisit": "Approximately 30 minutes",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Gran_Teatre_del_Liceu",
-      "youTube": "https://youtube.com/example-gran-teatre-liceu-facade-tour"
-    },
-    {
-      "name": "Mercat de Sant Antoni",
-      "category": "Historical",
-      "description": "A historic market with a modernist iron structure, free to wander and experience local produce and culture.",
-      "coordinates": {
-        "latitude": 41.3790,
-        "longitude": 2.1640
-      },
-      "address": "Carrer del Comte d'Urgell, 1, 08011 Barcelona, Spain",
-      "openingHours": "8:00 AM - 8:30 PM",
-      "admissionFee": "Free",
-      "bestTimeToVisit": "Morning, spring for freshest produce",
-      "durationOfVisit": "Approximately 1 hour",
-      "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Mercat_de_Sant_Antoni",
-      "youTube": "https://youtube.com/example-mercat-sant-antoni-tour"
-    },
-    {
-      "name": "Carrer del Paradís",
-      "category": "Historical",
-      "description": "A medieval street with Roman ruins, including the Temple of Augustus, free to explore and rich in history.",
-      "coordinates": {
-        "latitude": 41.3830,
-        "longitude": 2.1760
-      },
-      "address": "Carrer del Paradís, 08002 Barcelona, Spain",
-      "openingHours": "24/7",
-      "admissionFee": "Free",
-      "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
-      "durationOfVisit": "Approximately 30 minutes",
-      "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Carrer_del_Paradís",
-      "youTube": "https://youtube.com/example-carrer-paradis-tour"
-    },
-    {
-      "name": "Parc de Joan Miró",
-      "category": "Nature",
-      "description": "A modern park with sculptures by Joan Miró, including the large 'Dona i Ocell,' free entry and great for relaxation.",
-      "coordinates": {
-        "latitude": 41.3790,
-        "longitude": 2.1590
-      },
-      "address": "Carrer de Tarragona, 141, 08014 Barcelona, Spain",
-      "openingHours": "10:00 AM - 10:00 PM",
-      "admissionFee": "Free",
-      "bestTimeToVisit": "Morning, spring for fewer crowds",
-      "durationOfVisit": "1-2 hours",
-      "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_Joan_Miró",
-      "youTube": "https://youtube.com/example-parc-joan-miro-tour"
-    },
-    {
-      "name": "Plaça del Rei",
-      "category": "Historical",
-      "description": "A historic square in the Gothic Quarter, surrounded by medieval buildings, free to visit and rich with history.",
-      "coordinates": {
-        "latitude": 41.3830,
-        "longitude": 2.1760
-      },
-      "address": "Plaça del Rei, 08002 Barcelona, Spain",
-      "openingHours": "24/7",
-      "admissionFee": "Free",
-      "bestTimeToVisit": "Evening, summer for ambiance",
-      "durationOfVisit": "Approximately 30 minutes",
-      "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Plaça_del_Rei",
-      "youTube": "https://youtube.com/example-placa-del-rei-tour"
-    },
-    {
-      "name": "Port Vell",
-      "category": "Unique Places",
-      "description": "The old port area with marina views, free to stroll and enjoy waterfront activities.",
-      "coordinates": {
-        "latitude": 41.3780,
-        "longitude": 2.1840
-      },
-      "address": "Moll d'Espanya, 08039 Barcelona, Spain",
-      "openingHours": "24/7",
-      "admissionFee": "Free",
-      "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
-      "durationOfVisit": "1-2 hours",
-      "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/Port_Vell",
-      "youTube": "https://youtube.com/example-port-vell-tour"
-    },
-    {
-      "name": "El Raval Neighborhood",
-      "category": "Unique Places",
-      "description": "A diverse area with street art, cafes, and cultural spots, free to explore and experience local life.",
-      "coordinates": {
-        "latitude": 41.3830,
-        "longitude": 2.1660
-      },
-      "address": "El Raval, 08001 Barcelona, Spain",
-      "openingHours": "24/7",
-      "admissionFee": "Free",
-      "bestTimeToVisit": "Morning, spring for fewer crowds",
-      "durationOfVisit": "1-2 hours",
-      "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
-      "wikipedia": "https://en.wikipedia.org/wiki/El_Raval",
-      "youTube": "https://youtube.com/example-el-raval-tour"
-    },
-    
-    {
-        "name": "Parc de Joan Miró",
-        "category": "Nature",
-        "description": "A modern park with sculptures by Joan Miró, including the large 'Dona i Ocell,' free entry and great for relaxation.",
-        "coordinates": {
-            "latitude": 41.3790,
-            "longitude": 2.1590
-        },
-        "address": "Carrer de Tarragona, 141, 08014 Barcelona, Spain",
-        "openingHours": "10:00 AM - 10:00 PM",
-        "admissionFee": "Free",
-        "bestTimeToVisit": "Morning, spring for fewer crowds",
-        "durationOfVisit": "1-2 hours",
-        "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025",
-        "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_Joan_Miró",
-        "youTube": "https://youtube.com/example-parc-joan-miro-tour"
-    },
-    {
-        "name": "Razzmatazz",
-        "category": "Nightlife",
-        "description": "A multi-room club with varied music genres, entry around €15-20 including a drink, known for excellent sound and vibe.",
-        "coordinates": {
-            "latitude": 41.3971,
-            "longitude": 2.1696
-        },
-        "address": "Carrer dels Almogàvers, 122, 08018 Barcelona, Spain",
-        "entryFee": "€15-20",
-        "bestTimeToVisit": "Thursday to Saturday, 12:00 AM onwards",
-        "rating": "4.5/5, based on Time Out reviews",
-        "website": "https://www.salarazzmatazz.com/en/",
-        "youTube": "https://youtube.com/example-razzmatazz-night"
-    },
-    {
-        "name": "Sala Apolo",
-        "category": "Nightlife",
-        "description": "Offers concerts and club nights, entry €10-15, known for friendly staff and diverse events.",
-        "coordinates": {
-            "latitude": 41.3744,
-            "longitude": 2.1673
-        },
-        "address": "Carrer Nou de la Rambla, 113, 08004 Barcelona, Spain",
-        "entryFee": "€10-15",
-        "bestTimeToVisit": "Friday to Sunday, 11:00 PM onwards",
-        "rating": "4.4/5, based on The Culture Trip reviews",
-        "website": "https://www.sala-apolo.com/en/",
-        "youTube": "https://youtube.com/example-sala-apolo-night"
-    },
-    {
-        "name": "Opium Barcelona",
-        "category": "Nightlife",
-        "description": "Beachfront club with entry around €20 including a drink, offering luxury service and top DJs.",
-        "coordinates": {
-            "latitude": 41.3771,
-            "longitude": 2.1970
-        },
-        "address": "Passeig Marítim de la Barceloneta, 34, 08003 Barcelona, Spain",
-        "entryFee": "€20",
-        "bestTimeToVisit": "Friday to Sunday, 12:00 AM onwards",
-        "rating": "4.6/5, based on Time Out reviews",
-        "website": "https://opiumbarcelona.com/en/",
-        "youTube": "https://youtube.com/example-opium-barcelona-night"
-    },
-    {
-        "name": "Plaça de Catalunya",
-        "category": "city out",
-        "description": "The central square of Barcelona, a bustling hub connecting the old city and the Eixample district, surrounded by shops and fountains.",
-        "coordinates": {
-            "latitude": 41.3870,
-            "longitude": 2.1700
-        },
-        "address": "Plaça de Catalunya, 08002 Barcelona, Spain",
-        "openingHours": "24/7",
-        "admissionFee": "Free",
-        "bestTimeToVisit": "Morning or evening for a lively atmosphere",
-        "durationOfVisit": "30 minutes - 1 hour",
-        "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
-        "wikipedia": "https://en.wikipedia.org/wiki/Plaça_de_Catalunya",
-        "youTube": "https://youtube.com/example-placa-catalunya-tour"
-    },
+    "name": "Sagrada Familia",
+    "category": "Art",
+    "description": "The Basílica i Temple Expiatori de la Sagrada Família, designed by Antoni Gaudí, is the largest unfinished Catholic church globally, with construction starting on March 19, 1882, and expected completion by 2026. It features a capacity of 9,000, a length of 90 m (300 ft), width of 60 m (200 ft), and a planned spire height of 172.5 m (570 ft), with 13 of 18 spires already built as of 2023.",
+    "coordinates": { "latitude": 41.40369, "longitude": 2.17445 },
+    "address": "Carrer de Mallorca, 401, 08013 Barcelona, Spain",
+    "openingHours": "Typically from 9:00 AM to 6:00 PM, subject to change; check official website for updates.",
+    "admissionFee": "€26 (basic ticket); book your ticket at https://example.com/sagrada-familia-tickets",
+    "bestTimeToVisit": "Early morning or late afternoon to avoid crowds, especially given its popularity with over 3 million annual visitors.",
+    "durationOfVisit": "Recommended 2-3 hours to explore the interiors and museum.",
+    "rating": "4.7 out of 5, based on 129,992 reviews on TripAdvisor as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Sagrada_Familia",
+    "youTube": "https://youtube.com/example-sagrada-familia-tour",
+    "audioGuide": "Available via the official Sagrada Familia app, in 19 languages, with standard (45 minutes) and express (25 minutes) versions.",
+    "tourBooking": "Book guided tours with skip-the-line access at https://viator.com/sagrada-familia-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Sagrada+Familia,+Barcelona"
+  },
+  {
+    "name": "Park Guell",
+    "category": "Art",
+    "description": "A public park system designed by Antoni Gaudí, featuring gardens and architectonic elements, built between 1900 and 1914, and opened to the public in 1926. It spans 17.18 hectares and was declared a UNESCO World Heritage Site in 1984.",
+    "coordinates": { "latitude": 41.422, "longitude": 2.1552 },
+    "address": "Carrer d'Olot, 7, 08024 Barcelona, Spain",
+    "openingHours": "Typically 8:00 AM to 9:00 PM; check official website for updates.",
+    "admissionFee": "Varies; book tickets at https://example.com/park-guell-tickets",
+    "bestTimeToVisit": "Early morning or late afternoon to enjoy the views and avoid peak crowds.",
+    "durationOfVisit": "Recommended 1-2 hours to explore the main areas and Gaudí House Museum.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Park_Guell",
+    "youTube": "https://youtube.com/example-park-guell-tour",
+    "audioGuide": "Available via the official Park Guell app or during guided tours.",
+    "tourBooking": "Book tours at https://getyourguide.com/park-guell-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Park+Guell,+Barcelona"
+  },
+  {
+    "name": "Camp Nou Stadium",
+    "category": "Entertainment",
+    "description": "Home of FC Barcelona, this stadium seats 99,354 and offers guided tours including the museum, dressing rooms, and pitch, making it a pilgrimage site for football fans.",
+    "coordinates": { "latitude": 41.38299, "longitude": 2.12222 },
+    "address": "Carrer d'Aristides Maillol, 12, 08028 Barcelona, Spain",
+    "openingHours": "Varies; check official website for tour schedules.",
+    "admissionFee": "Varies; book at https://example.com/camp-nou-tickets",
+    "bestTimeToVisit": "During non-match days for a quieter tour experience.",
+    "durationOfVisit": "Approximately 1 hour for the standard tour.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Camp_Nou",
+    "youTube": "https://youtube.com/example-camp-nou-tour",
+    "audioGuide": "Included in guided tours.",
+    "tourBooking": "Book at https://fcbarcelona.com/tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Camp+Nou+Stadium,+Barcelona"
+  },
+  {
+    "name": "Casa Batlló",
+    "category": "Art",
+    "description": "Designed by Gaudí, this residential building features a marine-inspired facade and was built between 1904 and 1906, a UNESCO site known for its fairy-tale appearance.",
+    "coordinates": { "latitude": 41.3917, "longitude": 2.16503 },
+    "address": "Passeig de Gràcia, 43, 08007 Barcelona, Spain",
+    "openingHours": "Typically 9:00 AM to 9:00 PM; check official website for updates.",
+    "admissionFee": "€29; book at https://example.com/casa-batllo-tickets",
+    "bestTimeToVisit": "Early morning or late afternoon to avoid crowds.",
+    "durationOfVisit": "Approximately 1 hour.",
+    "rating": "4.7 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Casa_Batlló",
+    "youTube": "https://youtube.com/example-casa-batllo-tour",
+    "audioGuide": "Available via official app or during visit.",
+    "tourBooking": "Book at https://example.com/casa-batllo-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Casa+Batlló,+Barcelona"
+  },
+  {
+    "name": "La Pedrera (Casa Milà)",
+    "category": "Art",
+    "description": "Another Gaudí masterpiece, built 1905-1910, known for its stone facade and rooftop sculptures, a UNESCO site.",
+    "coordinates": { "latitude": 41.39507, "longitude": 2.16200 },
+    "address": "Passeig de Gràcia, 92, 08008 Barcelona, Spain",
+    "openingHours": "Typically 9:00 AM to 8:00 PM; check official website for updates.",
+    "admissionFee": "Varies; book at https://example.com/la-pedrera-tickets",
+    "bestTimeToVisit": "Early morning or late afternoon.",
+    "durationOfVisit": "Approximately 1 hour.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/La_Pedrera",
+    "youTube": "https://youtube.com/example-la-pedrera-tour",
+    "audioGuide": "Available via official app or during visit.",
+    "tourBooking": "Book at https://example.com/la-pedrera-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/La+Pedrera+(Casa+Milà),+Barcelona"
+  },
+  {
+    "name": "Picasso Museum",
+    "category": "Art",
+    "description": "Houses over 4,000 works by Pablo Picasso, located in five Gothic palaces in El Born, focusing on his early career.",
+    "coordinates": { "latitude": 41.3839, "longitude": 2.1814 },
+    "address": "Carrer de Montcada, 15-23, 08003 Barcelona, Spain",
+    "openingHours": "Typically 9:00 AM to 7:00 PM; check official website for updates.",
+    "admissionFee": "Varies; book at https://example.com/picasso-museum-tickets",
+    "bestTimeToVisit": "Early morning or late afternoon.",
+    "durationOfVisit": "Approximately 1-2 hours.",
+    "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Picasso_Museum,_Barcelona",
+    "youTube": "https://youtube.com/example-picasso-museum-tour",
+    "audioGuide": "Available via official app or during visit.",
+    "tourBooking": "Book at https://example.com/picasso-museum-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Picasso+Museum,+Barcelona"
+  },
+  {
+    "name": "Barcelona Cathedral",
+    "category": "Historical",
+    "description": "A Gothic cathedral dedicated to the Holy Cross and Saint Eulalia, with a cloister featuring 13 geese, built in the 13th-15th centuries.",
+    "coordinates": { "latitude": 41.383333, "longitude": 2.178333 },
+    "address": "Plaça de la Catedral, s/n, 08002 Barcelona, Spain",
+    "openingHours": "Typically 8:00 AM to 7:00 PM; check official website for updates.",
+    "admissionFee": "Free, donations welcome.",
+    "bestTimeToVisit": "Early morning or late afternoon.",
+    "durationOfVisit": "Approximately 1 hour.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Barcelona_Cathedral",
+    "youTube": "https://youtube.com/example-barcelona-cathedral-tour",
+    "audioGuide": "Available via various apps or websites.",
+    "tourBooking": "Book guided tours at https://example.com/barcelona-cathedral-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Barcelona+Cathedral,+Barcelona"
+  },
+  {
+    "name": "Palau de la Musica Catalana",
+    "category": "Historical",
+    "description": "A Modernist concert hall, UNESCO-listed, opened in 1908, seating 2,200, known for its stained glass and mosaics.",
+    "coordinates": { "latitude": 41.3856, "longitude": 2.1764 },
+    "address": "Carrer de Sant Pere Més Alt, 11, 08002 Barcelona, Spain",
+    "openingHours": "Varies; check official website for concert and tour schedules.",
+    "admissionFee": "Varies for concerts and tours.",
+    "bestTimeToVisit": "During guided tours or concerts.",
+    "durationOfVisit": "Approximately 1 hour for tours.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Palau_de_la_Musica_Catalana",
+    "youTube": "https://youtube.com/example-palau-musica-tour",
+    "audioGuide": "Available during tours.",
+    "tourBooking": "Book at https://example.com/palau-musica-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Palau+de+la+Musica+Catalana,+Barcelona"
+  },
+  {
+    "name": "La Rambla",
+    "category": "Unique Places",
+    "description": "A tree-lined pedestrian boulevard, known for flower stalls, street performers, and historic buildings like the Liceu Theater, always bustling with activity.",
+    "coordinates": { "latitude": 41.385, "longitude": 2.176667 },
+    "address": "La Rambla, Barcelona, Spain",
+    "openingHours": "Always open.",
+    "admissionFee": "Free.",
+    "bestTimeToVisit": "Late afternoon or evening for the vibrant atmosphere.",
+    "durationOfVisit": "Variable, depending on exploration.",
+    "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/La_Rambla,_Barcelona",
+    "youTube": "https://youtube.com/example-la-rambla-tour",
+    "audioGuide": "Available via various apps or websites.",
+    "tourBooking": "Book guided walks at https://getyourguide.com/la-rambla-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/La+Rambla,+Barcelona"
+  },
+  {
+    "name": "Boqueria Market",
+    "category": "Historical",
+    "description": "A central fresh-produce market since 1836, housed in a Modernist building, offering a sensory experience with its colors, smells, and sounds.",
+    "coordinates": { "latitude": 41.3839, "longitude": 2.1733 },
+    "address": "La Rambla, 91, 08001 Barcelona, Spain",
+    "openingHours": "Typically 8:00 AM to 8:30 PM; check official website for updates.",
+    "admissionFee": "Free.",
+    "bestTimeToVisit": "Early morning for the freshest produce.",
+    "durationOfVisit": "Approximately 1 hour.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Boqueria_Market",
+    "youTube": "https://youtube.com/example-boqueria-market-tour",
+    "audioGuide": "Available via various apps or websites.",
+    "tourBooking": "Book market tours at https://getyourguide.com/boqueria-market-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Boqueria+Market,+Barcelona"
+  },
+  {
+    "name": "Magic Fountain of Montjuïc",
+    "category": "Entertainment",
+    "description": "An Art Deco fountain built for the 1929 World Exhibition, known for its light and music shows, held Thursday to Sunday in summer and Friday to Saturday off-season.",
+    "coordinates": { "latitude": 41.372222, "longitude": 2.151389 },
+    "address": "Avinguda de la Reina Maria Cristina, s/n, 08004 Barcelona, Spain",
+    "openingHours": "Evening shows; check official website for schedule.",
+    "admissionFee": "Free.",
+    "bestTimeToVisit": "During scheduled shows for the full experience.",
+    "durationOfVisit": "Approximately 30 minutes per show.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Magic_Fountain_of_Montjuïc",
+    "youTube": "https://youtube.com/example-magic-fountain-show",
+    "googleMapsLink": "https://www.google.com/maps/place/Magic+Fountain+of+Montjuïc,+Barcelona"
+  },
+  {
+    "name": "MNAC (Museu Nacional d'Art de Catalunya)",
+    "category": "Art",
+    "description": "Located in the Palau Nacional, built for the 1929 World Exhibition, it houses an exceptional collection of Catalan art from the 10th to 20th centuries, including European Renaissance and Baroque art.",
+    "coordinates": { "latitude": 41.366533, "longitude": 2.155 },
+    "address": "Carrer del Mirador del Palau Nacional, s/n, 08038 Barcelona, Spain",
+    "openingHours": "Typically 10:00 AM to 6:00 PM; check official website for updates.",
+    "admissionFee": "€12; book at https://example.com/mnac-tickets",
+    "bestTimeToVisit": "Midweek mornings for fewer crowds.",
+    "durationOfVisit": "2-3 hours.",
+    "rating": "4.6 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Museu_Nacional_d'Art_de_Catalunya",
+    "youTube": "https://youtube.com/example-mnac-tour",
+    "audioGuide": "Available during guided tours.",
+    "tourBooking": "Book at https://example.com/mnac-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/MNAC+(Museu+Nacional+d'Art+de+Catalunya),+Barcelona"
+  },
+  {
+    "name": "Poble Espanyo",
+    "category": "Unique Places",
+    "description": "A village representing different regions of Spain, built for the 1929 World Fair, with traditional architecture and shops.",
+    "coordinates": { "latitude": 41.3672, "longitude": 2.1594 },
+    "address": "Avinguda de la Reina Maria Cristina, s/n, 08004 Barcelona, Spain",
+    "openingHours": "10:00 AM - 8:00 PM; check official website for updates.",
+    "admissionFee": "Varies; book at https://example.com/poble-espanyo-tickets",
+    "bestTimeToVisit": "Late afternoon for fewer crowds.",
+    "durationOfVisit": "1-2 hours.",
+    "rating": "4.0 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Poble_Espanyo",
+    "youTube": "https://youtube.com/example-poble-espanyo-tour",
+    "audioGuide": "Available during guided tours.",
+    "tourBooking": "Book at https://example.com/poble-espanyo-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Poble+Espanyo,+Barcelona"
+  },
+  {
+    "name": "Santa Maria del Mar",
+    "category": "Historical",
+    "description": "A beautiful Gothic church in El Born, ideal for history enthusiasts, built between 1329 and 1383.",
+    "coordinates": { "latitude": 41.3861, "longitude": 2.1842 },
+    "address": "Plaça de Santa Maria, 1, 08003 Barcelona, Spain",
+    "openingHours": "9:00 AM - 6:00 PM; check official website for updates.",
+    "admissionFee": "Free, donations welcome.",
+    "bestTimeToVisit": "Early morning or late afternoon to avoid crowds.",
+    "durationOfVisit": "Approximately 1 hour.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Santa_Maria_del_Mar",
+    "youTube": "https://youtube.com/example-santa-maria-del-mar-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Santa+Maria+del+Mar,+Barcelona"
+  },
+  {
+    "name": "Fundacio Joan Mirò",
+    "category": "Art",
+    "description": "Dedicated to the artist Joan Mirò, with abstract and surrealist works, housed in a building designed by Josep Lluís Sert.",
+    "coordinates": { "latitude": 41.3722, "longitude": 2.1594 },
+    "address": "Carrer de Montjuïc, 17-21, 08038 Barcelona, Spain",
+    "openingHours": "10:00 AM - 6:00 PM (closed Mondays); check official website for updates.",
+    "admissionFee": "Varies; book at https://example.com/fundacio-joan-miro-tickets",
+    "bestTimeToVisit": "Morning, midweek for fewer crowds.",
+    "durationOfVisit": "1-2 hours.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Fundacio_Joan_Mirò",
+    "youTube": "https://youtube.com/example-fundacio-joan-miro-tour",
+    "audioGuide": "Available during guided tours or via the official app.",
+    "tourBooking": "Book at https://example.com/fundacio-joan-miro-tours",
+    "googleMapsLink": "https://www.google.com/maps/place/Fundacio+Joan+Mirò,+Barcelona"
+  },
+  {
+    "name": "Parc de la Ciutadella",
+    "category": "Nature",
+    "description": "A large urban park with a lake, zoo, and the Catalan Parliament, ideal for relaxation and recreation.",
+    "coordinates": { "latitude": 41.3800, "longitude": 2.1850 },
+    "address": "Passeig de Pujades, s/n, 08003 Barcelona, Spain",
+    "openingHours": "10:00 AM - 10:00 PM; check official website for updates.",
+    "admissionFee": "Free entry.",
+    "bestTimeToVisit": "Any daylight hours, preferably morning or late afternoon to avoid peak crowds.",
+    "durationOfVisit": "Variable, depending on exploration.",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_la_Ciutadella",
+    "youTube": "https://youtube.com/example-parc-ciutadella-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Parc+de+la+Ciutadella,+Barcelona"
+  },
+  {
+    "name": "Tibidabo Mountain",
+    "category": "Amusement Park",
+    "description": "A historic amusement park atop Mount Tibidabo with rides, stunning views, and a unique retro charm.",
+    "coordinates": { "latitude": 41.4167, "longitude": 2.1167 },
+    "address": "Plaça del Tibidabo, 3-4, 08035 Barcelona, Spain",
+    "openingHours": "Varies by season; check official website for updates.",
+    "admissionFee": "€35 (full access); book at https://example.com/tibidabo-tickets",
+    "bestTimeToVisit": "Weekdays to avoid crowds, spring or autumn for pleasant weather.",
+    "durationOfVisit": "Variable, depending on the number of rides and activities chosen.",
+    "rating": "4.0 out of 5, based on TripAdvisor reviews as of March 2025.",
+    "wikipedia": "https://en.wikipedia.org/wiki/Tibidabo_Amusement_Park",
+    "googleMapsLink": "https://www.google.com/maps/place/Tibidabo+Mountain,+Barcelona"
+  },
+  {
+    "name": "Arc de Triomf",
+    "category": "Historical",
+    "description": "A red-brick triumphal arch built for the 1888 World Fair, featuring Moorish and neo-Mudéjar styles, free to visit and ideal for photos.",
+    "coordinates": { "latitude": 41.3910, "longitude": 2.1810 },
+    "address": "Passeig de Lluís Companys, 08003 Barcelona, Spain",
+    "openingHours": "24/7",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Morning, spring for fewer crowds",
+    "durationOfVisit": "Approximately 30 minutes",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Arc_de_Triomf",
+    "youTube": "https://youtube.com/example-arc-de-triomf-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Arc+de+Triomf,+Barcelona"
+  },
+  {
+    "name": "Plaça d'Espanya",
+    "category": "Unique Places",
+    "description": "A large square with fountains, the Venetian Towers, and views towards Montjuïc, free to explore and a hub for events.",
+    "coordinates": { "latitude": 41.3730, "longitude": 2.1490 },
+    "address": "Plaça d'Espanya, 08004 Barcelona, Spain",
+    "openingHours": "24/7",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Evening, summer for illuminated fountains",
+    "durationOfVisit": "Approximately 1 hour",
+    "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Plaça_d'Espanya",
+    "youTube": "https://youtube.com/example-placa-despanya-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Plaça+d'Espanya,+Barcelona"
+  },
+  {
+    "name": "Museu del Disseny de Barcelona (Exterior)",
+    "category": "Art",
+    "description": "While the museum has an entry fee, the exterior and surrounding Plaça de les Glòries Catalanes are free, offering modern architecture to admire.",
+    "coordinates": { "latitude": 41.3830, "longitude": 2.1760 },
+    "address": "Plaça de les Glòries Catalanes, 37, 08018 Barcelona, Spain",
+    "openingHours": "24/7 (exterior)",
+    "admissionFee": "Free (exterior)",
+    "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
+    "durationOfVisit": "Approximately 30 minutes",
+    "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Museu_del_Disseny_de_Barcelona",
+    "youTube": "https://youtube.com/example-museu-disseny-exterior-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Museu+del+Disseny+de+Barcelona+(Exterior),+Barcelona"
+  },
+  {
+    "name": "Gran Teatre del Liceu (Facade)",
+    "category": "Historical",
+    "description": "The facade of this historic opera house on La Rambla is free to view, offering a glimpse of its cultural significance.",
+    "coordinates": { "latitude": 41.3800, "longitude": 2.1740 },
+    "address": "La Rambla, 51-59, 08002 Barcelona, Spain",
+    "openingHours": "24/7 (exterior)",
+    "admissionFee": "Free (exterior)",
+    "bestTimeToVisit": "Morning, spring for fewer crowds",
+    "durationOfVisit": "Approximately 30 minutes",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Gran_Teatre_del_Liceu",
+    "youTube": "https://youtube.com/example-gran-teatre-liceu-facade-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Gran+Teatre+del+Liceu+(Facade),+Barcelona"
+  },
+  {
+    "name": "Mercat de Sant Antoni",
+    "category": "Historical",
+    "description": "A historic market with a modernist iron structure, free to wander and experience local produce and culture.",
+    "coordinates": { "latitude": 41.3790, "longitude": 2.1640 },
+    "address": "Carrer del Comte d'Urgell, 1, 08011 Barcelona, Spain",
+    "openingHours": "8:00 AM - 8:30 PM",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Morning, spring for freshest produce",
+    "durationOfVisit": "Approximately 1 hour",
+    "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Mercat_de_Sant_Antoni",
+    "youTube": "https://youtube.com/example-mercat-sant-antoni-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Mercat+de+Sant+Antoni,+Barcelona"
+  },
+  {
+    "name": "Carrer del Paradís",
+    "category": "Historical",
+    "description": "A medieval street with Roman ruins, including the Temple of Augustus, free to explore and rich in history.",
+    "coordinates": { "latitude": 41.3830, "longitude": 2.1760 },
+    "address": "Carrer del Paradís, 08002 Barcelona, Spain",
+    "openingHours": "24/7",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
+    "durationOfVisit": "Approximately 30 minutes",
+    "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Carrer_del_Paradís",
+    "youTube": "https://youtube.com/example-carrer-paradis-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Carrer+del+Paradís,+Barcelona"
+  },
+  {
+    "name": "Parc de Joan Miró",
+    "category": "Nature",
+    "description": "A modern park with sculptures by Joan Miró, including the large 'Dona i Ocell,' free entry and great for relaxation.",
+    "coordinates": { "latitude": 41.3790, "longitude": 2.1590 },
+    "address": "Carrer de Tarragona, 141, 08014 Barcelona, Spain",
+    "openingHours": "10:00 AM - 10:00 PM",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Morning, spring for fewer crowds",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_Joan_Miró",
+    "youTube": "https://youtube.com/example-parc-joan-miro-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Parc+de+Joan+Miró,+Barcelona"
+  },
+  {
+    "name": "Plaça del Rei",
+    "category": "Historical",
+    "description": "A historic square in the Gothic Quarter, surrounded by medieval buildings, free to visit and rich with history.",
+    "coordinates": { "latitude": 41.3830, "longitude": 2.1760 },
+    "address": "Plaça del Rei, 08002 Barcelona, Spain",
+    "openingHours": "24/7",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Evening, summer for ambiance",
+    "durationOfVisit": "Approximately 30 minutes",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Plaça_del_Rei",
+    "youTube": "https://youtube.com/example-placa-del-rei-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Plaça+del+Rei,+Barcelona"
+  },
+  {
+    "name": "Port Vell",
+    "category": "Unique Places",
+    "description": "The old port area with marina views, free to stroll and enjoy waterfront activities.",
+    "coordinates": { "latitude": 41.3780, "longitude": 2.1840 },
+    "address": "Moll d'Espanya, 08039 Barcelona, Spain",
+    "openingHours": "24/7",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Afternoon, autumn for fewer crowds",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Port_Vell",
+    "youTube": "https://youtube.com/example-port-vell-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Port+Vell,+Barcelona"
+  },
+  {
+    "name": "El Raval Neighborhood",
+    "category": "Unique Places",
+    "description": "A diverse area with street art, cafes, and cultural spots, free to explore and experience local life.",
+    "coordinates": { "latitude": 41.3830, "longitude": 2.1660 },
+    "address": "El Raval, 08001 Barcelona, Spain",
+    "openingHours": "24/7",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Morning, spring for fewer crowds",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.3 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/El_Raval",
+    "youTube": "https://youtube.com/example-el-raval-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/El+Raval+Neighborhood,+Barcelona"
+  },
+  {
+    "name": "Parc de Joan Miró",
+    "category": "Nature",
+    "description": "A modern park with sculptures by Joan Miró, including the large 'Dona i Ocell,' free entry and great for relaxation.",
+    "coordinates": { "latitude": 41.3790, "longitude": 2.1590 },
+    "address": "Carrer de Tarragona, 141, 08014 Barcelona, Spain",
+    "openingHours": "10:00 AM - 10:00 PM",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Morning, spring for fewer crowds",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.2 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Parc_de_Joan_Miró",
+    "youTube": "https://youtube.com/example-parc-joan-miro-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Parc+de+Joan+Miró,+Barcelona"
+  },
+  {
+    "name": "Razzmatazz",
+    "category": "Nightlife",
+    "description": "A multi-room club with varied music genres, entry around €15-20 including a drink, known for excellent sound and vibe.",
+    "coordinates": { "latitude": 41.3971, "longitude": 2.1696 },
+    "address": "Carrer dels Almogàvers, 122, 08018 Barcelona, Spain",
+    "entryFee": "€15-20",
+    "bestTimeToVisit": "Thursday to Saturday, 12:00 AM onwards",
+    "rating": "4.5/5, based on Time Out reviews",
+    "website": "https://www.salarazzmatazz.com/en/",
+    "youTube": "https://youtube.com/example-razzmatazz-night",
+    "googleMapsLink": "https://www.google.com/maps/place/Razzmatazz,+Barcelona"
+  },
+  {
+    "name": "Sala Apolo",
+    "category": "Nightlife",
+    "description": "Offers concerts and club nights, entry €10-15, known for friendly staff and diverse events.",
+    "coordinates": { "latitude": 41.3744, "longitude": 2.1673 },
+    "address": "Carrer Nou de la Rambla, 113, 08004 Barcelona, Spain",
+    "entryFee": "€10-15",
+    "bestTimeToVisit": "Friday to Sunday, 11:00 PM onwards",
+    "rating": "4.4/5, based on The Culture Trip reviews",
+    "website": "https://www.sala-apolo.com/en/",
+    "youTube": "https://youtube.com/example-sala-apolo-night",
+    "googleMapsLink": "https://www.google.com/maps/place/Sala+Apolo,+Barcelona"
+  },
+  {
+    "name": "Opium Barcelona",
+    "category": "Nightlife",
+    "description": "Beachfront club with entry around €20 including a drink, offering luxury service and top DJs.",
+    "coordinates": { "latitude": 41.3771, "longitude": 2.1970 },
+    "address": "Passeig Marítim de la Barceloneta, 34, 08003 Barcelona, Spain",
+    "entryFee": "€20",
+    "bestTimeToVisit": "Friday to Sunday, 12:00 AM onwards",
+    "rating": "4.6/5, based on Time Out reviews",
+    "website": "https://opiumbarcelona.com/en/",
+    "youTube": "https://youtube.com/example-opium-barcelona-night",
+    "googleMapsLink": "https://www.google.com/maps/place/Opium+Barcelona,+Barcelona"
+  },
   {
     "name": "Plaça de Catalunya",
     "category": "city out",
     "description": "The central square of Barcelona, a bustling hub connecting the old city and the Eixample district, surrounded by shops and fountains.",
-    "coordinates": {
-      "latitude": 41.3870,
-      "longitude": 2.1700
-    },
+    "coordinates": { "latitude": 41.3870, "longitude": 2.1700 },
     "address": "Plaça de Catalunya, 08002 Barcelona, Spain",
     "openingHours": "24/7",
     "admissionFee": "Free",
@@ -910,16 +859,29 @@
     "durationOfVisit": "30 minutes - 1 hour",
     "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Plaça_de_Catalunya",
-    "youTube": "https://youtube.com/example-placa-catalunya-tour"
+    "youTube": "https://youtube.com/example-placa-catalunya-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Plaça+de+Catalunya,+Barcelona"
+  },
+  {
+    "name": "Plaça de Catalunya",
+    "category": "city out",
+    "description": "The central square of Barcelona, a bustling hub connecting the old city and the Eixample district, surrounded by shops and fountains.",
+    "coordinates": { "latitude": 41.3870, "longitude": 2.1700 },
+    "address": "Plaça de Catalunya, 08002 Barcelona, Spain",
+    "openingHours": "24/7",
+    "admissionFee": "Free",
+    "bestTimeToVisit": "Morning or evening for a lively atmosphere",
+    "durationOfVisit": "30 minutes - 1 hour",
+    "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
+    "wikipedia": "https://en.wikipedia.org/wiki/Plaça_de_Catalunya",
+    "youTube": "https://youtube.com/example-placa-catalunya-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Plaça+de+Catalunya,+Barcelona"
   },
   {
     "name": "Montserrat Monastery",
     "category": "city out",
     "description": "A historic Benedictine monastery nestled in the jagged Montserrat mountains, home to the revered Black Madonna statue.",
-    "coordinates": {
-      "latitude": 41.5935,
-      "longitude": 1.8379
-    },
+    "coordinates": { "latitude": 41.5935, "longitude": 1.8379 },
     "address": "08199 Montserrat, Barcelona, Spain",
     "openingHours": "7:00 AM - 8:00 PM",
     "admissionFee": "Free entry to the basilica; funicular and museum fees apply (~€10-15)",
@@ -927,16 +889,14 @@
     "durationOfVisit": "3-4 hours",
     "rating": "4.8 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Santa_Maria_de_Montserrat_Abbey",
-    "youTube": "https://youtube.com/example-montserrat-tour"
+    "youTube": "https://youtube.com/example-montserrat-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Montserrat+Monastery,+Barcelona"
   },
   {
     "name": "Sitges Beach",
     "category": "city out",
     "description": "A picturesque coastal town with sandy beaches, charming streets, and a vibrant cultural scene, known for its film festival.",
-    "coordinates": {
-      "latitude": 41.2351,
-      "longitude": 1.8119
-    },
+    "coordinates": { "latitude": 41.2351, "longitude": 1.8119 },
     "address": "Passeig Marítim, 08870 Sitges, Barcelona, Spain",
     "openingHours": "24/7",
     "admissionFee": "Free",
@@ -944,16 +904,14 @@
     "durationOfVisit": "2-4 hours",
     "rating": "4.6 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Sitges",
-    "youTube": "https://youtube.com/example-sitges-beach-tour"
+    "youTube": "https://youtube.com/example-sitges-beach-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Sitges+Beach,+Barcelona"
   },
   {
     "name": "Dalí Theatre-Museum",
     "category": "city out",
     "description": "A surreal museum in Figueres designed by Salvador Dalí, showcasing his eccentric artworks and tomb.",
-    "coordinates": {
-      "latitude": 42.2681,
-      "longitude": 2.9595
-    },
+    "coordinates": { "latitude": 42.2681, "longitude": 2.9595 },
     "address": "Plaça Gala i Salvador Dalí, 5, 17600 Figueres, Barcelona, Spain",
     "openingHours": "9:30 AM - 6:00 PM (varies by season)",
     "admissionFee": "€15 adults, discounts available",
@@ -961,16 +919,14 @@
     "durationOfVisit": "2-3 hours",
     "rating": "4.7 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Dalí_Theatre_and_Museum",
-    "youTube": "https://youtube.com/example-dali-museum-tour"
+    "youTube": "https://youtube.com/example-dali-museum-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Dalí+Theatre-Museum,+Barcelona"
   },
   {
     "name": "Girona Old Town",
     "category": "city out",
     "description": "A medieval city with colorful riverside houses, a grand cathedral, and ancient walls featured in Game of Thrones.",
-    "coordinates": {
-      "latitude": 41.9851,
-      "longitude": 2.8241
-    },
+    "coordinates": { "latitude": 41.9851, "longitude": 2.8241 },
     "address": "17004 Girona, Barcelona, Spain",
     "openingHours": "24/7 (specific sites vary)",
     "admissionFee": "Free to explore; cathedral entry ~€7",
@@ -978,16 +934,14 @@
     "durationOfVisit": "3-5 hours",
     "rating": "4.8 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Girona",
-    "youTube": "https://youtube.com/example-girona-tour"
+    "youTube": "https://youtube.com/example-girona-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Girona+Old+Town,+Barcelona"
   },
   {
     "name": "Costa Brava (Tossa de Mar)",
     "category": "city out",
     "description": "A stunning coastal town with a medieval castle, clear waters, and sandy beaches along the rugged Costa Brava.",
-    "coordinates": {
-      "latitude": 41.7206,
-      "longitude": 2.9301
-    },
+    "coordinates": { "latitude": 41.7206, "longitude": 2.9301 },
     "address": "17320 Tossa de Mar, Barcelona, Spain",
     "openingHours": "24/7",
     "admissionFee": "Free",
@@ -995,16 +949,14 @@
     "durationOfVisit": "3-6 hours",
     "rating": "4.7 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Tossa_de_Mar",
-    "youTube": "https://youtube.com/example-tossa-de-mar-tour"
+    "youTube": "https://youtube.com/example-tossa-de-mar-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Costa+Brava+(Tossa+de+Mar),+Barcelona"
   },
   {
     "name": "Colònia Güell",
     "category": "city out",
     "description": "A Gaudí-designed crypt in an industrial village, a UNESCO site with unique architecture.",
-    "coordinates": {
-      "latitude": 41.3637,
-      "longitude": 2.0279
-    },
+    "coordinates": { "latitude": 41.3637, "longitude": 2.0279 },
     "address": "08690 Santa Coloma de Cervelló, Barcelona, Spain",
     "openingHours": "10:00 AM - 3:00 PM (weekends), 10:00 AM - 5:00 PM (weekdays)",
     "admissionFee": "€9 adults, includes audio guide",
@@ -1012,16 +964,14 @@
     "durationOfVisit": "1-2 hours",
     "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Colònia_Güell",
-    "youTube": "https://youtube.com/example-colonia-guell-tour"
+    "youTube": "https://youtube.com/example-colonia-guell-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Colònia+Guell,+Barcelona"
   },
   {
     "name": "Vilafranca del Penedès",
     "category": "city out",
     "description": "A wine town in the Penedès region, famous for its cava and the Vinseum wine museum.",
-    "coordinates": {
-      "latitude": 41.3461,
-      "longitude": 1.6980
-    },
+    "coordinates": { "latitude": 41.3461, "longitude": 1.6980 },
     "address": "08720 Vilafranca del Penedès, Barcelona, Spain",
     "openingHours": "24/7 (museum: 10:00 AM - 2:00 PM, 4:00 PM - 7:00 PM)",
     "admissionFee": "Free to explore; Vinseum ~€7",
@@ -1029,16 +979,14 @@
     "durationOfVisit": "2-4 hours",
     "rating": "4.4 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Vilafranca_del_Penedès",
-    "youTube": "https://youtube.com/example-vilafranca-tour"
+    "youTube": "https://youtube.com/example-vilafranca-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Vilafranca+del+Penedès,+Barcelona"
   },
   {
     "name": "Cardona Castle",
     "category": "city out",
     "description": "A medieval fortress with a Romanesque church and nearby salt mines, offering panoramic views.",
-    "coordinates": {
-      "latitude": 41.9139,
-      "longitude": 1.6795
-    },
+    "coordinates": { "latitude": 41.9139, "longitude": 1.6795 },
     "address": "08261 Cardona, Barcelona, Spain",
     "openingHours": "10:00 AM - 5:30 PM (varies by season)",
     "admissionFee": "€6 adults",
@@ -1046,16 +994,14 @@
     "durationOfVisit": "2-3 hours",
     "rating": "4.6 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Cardona_Castle",
-    "youTube": "https://youtube.com/example-cardona-castle-tour"
+    "youTube": "https://youtube.com/example-cardona-castle-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Cardona+Castle,+Barcelona"
   },
   {
     "name": "Sant Cugat Monastery",
     "category": "city out",
     "description": "A Romanesque monastery with a beautiful cloister and historical significance.",
-    "coordinates": {
-      "latitude": 41.4735,
-      "longitude": 2.0851
-    },
+    "coordinates": { "latitude": 41.4735, "longitude": 2.0851 },
     "address": "Plaça d’Octavià, 08172 Sant Cugat del Vallès, Barcelona, Spain",
     "openingHours": "10:00 AM - 1:30 PM, 4:00 PM - 7:00 PM (closed Mondays)",
     "admissionFee": "Free",
@@ -1063,16 +1009,14 @@
     "durationOfVisit": "1-2 hours",
     "rating": "4.5 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Sant_Cugat_Monastery",
-    "youTube": "https://youtube.com/example-sant-cugat-tour"
+    "youTube": "https://youtube.com/example-sant-cugat-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Sant+Cugat+Monastery,+Barcelona"
   },
   {
     "name": "Cava Wineries (Sant Sadurní d’Anoia)",
     "category": "city out",
     "description": "The heart of Catalonia’s cava production, with tours at wineries like Freixenet and Codorníu.",
-    "coordinates": {
-      "latitude": 41.4254,
-      "longitude": 1.7856
-    },
+    "coordinates": { "latitude": 41.4254, "longitude": 1.7856 },
     "address": "08770 Sant Sadurní d’Anoia, Barcelona, Spain",
     "openingHours": "Varies by winery (typically 9:00 AM - 5:00 PM)",
     "admissionFee": "€12-20 per winery tour",
@@ -1080,347 +1024,360 @@
     "durationOfVisit": "2-3 hours per winery",
     "rating": "4.6 out of 5, based on TripAdvisor reviews as of March 2025",
     "wikipedia": "https://en.wikipedia.org/wiki/Sant_Sadurní_d%27Anoia",
-    "youTube": "https://youtube.com/example-cava-wineries-tour"
-  },
-   
-  
-  {
-    name: "Disfrutar",
-    category: "Dining",
-    description: "A three-Michelin-star restaurant run by former El Bulli chefs, known for avant-garde Mediterranean cuisine. Featured in culinary documentaries.",
-    coordinates: { latitude: 41.3940, longitude: 2.1486 },
-    address: "Carrer de Villarroel, 163, 08036 Barcelona, Spain",
-    openingHours: "1:00 PM - 3:00 PM, 7:00 PM - 10:00 PM (closed Sun-Mon)",
-    admissionFee: "€210-250 (tasting menu)",
-    bestTimeToVisit: "Evening, weekdays for fewer crowds",
-    durationOfVisit: "3-4 hours",
-    rating: "4.9/5, based on TheFork and Michelin reviews",
-    reservationLink: "https://disfrutarbarcelona.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3940,2.1486"
+    "youTube": "https://youtube.com/example-cava-wineries-tour",
+    "googleMapsLink": "https://www.google.com/maps/place/Cava+Wineries+(Sant+Sadurní+d’Anoia),+Barcelona"
   },
   {
-    name: "ABaC",
-    category: "Dining",
-    description: "Three-Michelin-star spot by Jordi Cruz, offering a 20-course tasting menu. A favorite of celebrities like Lionel Messi.",
-    coordinates: { latitude: 41.4104, longitude: 2.1349 },
-    address: "Av. del Tibidabo, 1, 08022 Barcelona, Spain",
-    openingHours: "1:30 PM - 3:30 PM, 8:00 PM - 10:30 PM",
-    admissionFee: "€250-300 (tasting menu)",
-    bestTimeToVisit: "Evening for a special occasion",
-    durationOfVisit: "3-4 hours",
-    rating: "4.8/5, based on TripAdvisor reviews",
-    reservationLink: "https://abacrestaurant.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.4104,2.1349"
+    "name": "Disfrutar",
+    "category": "Dining",
+    "description": "A three-Michelin-star restaurant run by former El Bulli chefs, known for avant-garde Mediterranean cuisine. Featured in culinary documentaries.",
+    "coordinates": { "latitude": 41.3940, "longitude": 2.1486 },
+    "address": "Carrer de Villarroel, 163, 08036 Barcelona, Spain",
+    "openingHours": "1:00 PM - 3:00 PM, 7:00 PM - 10:00 PM (closed Sun-Mon)",
+    "admissionFee": "€210-250 (tasting menu)",
+    "bestTimeToVisit": "Evening, weekdays for fewer crowds",
+    "durationOfVisit": "3-4 hours",
+    "rating": "4.9/5, based on TheFork and Michelin reviews",
+    "reservationLink": "https://disfrutarbarcelona.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Disfrutar,+Barcelona"
   },
   {
-    name: "Cinc Sentits",
-    category: "Dining",
-    description: "Two-Michelin-star restaurant with modern Catalan tasting menus, praised for its sensory experience.",
-    coordinates: { latitude: 41.3848, longitude: 2.1568 },
-    address: "Carrer d’Entença, 60, 08015 Barcelona, Spain",
-    openingHours: "1:30 PM - 3:00 PM, 8:00 PM - 10:00 PM (closed Sun-Mon)",
-    admissionFee: "€185-200 (tasting menu)",
-    bestTimeToVisit: "Lunch for a lighter crowd",
-    durationOfVisit: "2-3 hours",
-    rating: "4.7/5, based on TheFork reviews",
-    reservationLink: "https://cincsentits.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3848,2.1568"
+    "name": "ABaC",
+    "category": "Dining",
+    "description": "Three-Michelin-star spot by Jordi Cruz, offering a 20-course tasting menu. A favorite of celebrities like Lionel Messi.",
+    "coordinates": { "latitude": 41.4104, "longitude": 2.1349 },
+    "address": "Av. del Tibidabo, 1, 08022 Barcelona, Spain",
+    "openingHours": "1:30 PM - 3:30 PM, 8:00 PM - 10:30 PM",
+    "admissionFee": "€250-300 (tasting menu)",
+    "bestTimeToVisit": "Evening for a special occasion",
+    "durationOfVisit": "3-4 hours",
+    "rating": "4.8/5, based on TripAdvisor reviews",
+    "reservationLink": "https://abacrestaurant.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/ABaC,+Barcelona"
   },
   {
-    name: "Lasarte",
-    category: "Dining",
-    description: "Three-Michelin-star restaurant by Martín Berasategui, known for its elegant dishes and celebrity clientele.",
-    coordinates: { latitude: 41.3912, longitude: 2.1505 },
-    address: "Carrer de Mallorca, 259, 08008 Barcelona, Spain",
-    openingHours: "1:00 PM - 3:00 PM, 8:00 PM - 10:00 PM (closed Sun-Mon)",
-    admissionFee: "€230-280 (tasting menu)",
-    bestTimeToVisit: "Evening for ambiance",
-    durationOfVisit: "3-4 hours",
-    rating: "4.8/5, based on Michelin Guide",
-    reservationLink: "https://restaurantlasarte.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3912,2.1505"
+    "name": "Cinc Sentits",
+    "category": "Dining",
+    "description": "Two-Michelin-star restaurant with modern Catalan tasting menus, praised for its sensory experience.",
+    "coordinates": { "latitude": 41.3848, "longitude": 2.1568 },
+    "address": "Carrer d’Entença, 60, 08015 Barcelona, Spain",
+    "openingHours": "1:30 PM - 3:00 PM, 8:00 PM - 10:00 PM (closed Sun-Mon)",
+    "admissionFee": "€185-200 (tasting menu)",
+    "bestTimeToVisit": "Lunch for a lighter crowd",
+    "durationOfVisit": "2-3 hours",
+    "rating": "4.7/5, based on TheFork reviews",
+    "reservationLink": "https://cincsentits.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Cinc+Sentits,+Barcelona"
   },
   {
-    name: "Els Quatre Gats",
-    category: "Dining",
-    description: "A modernist café where Picasso held his first exhibition, featured in Woody Allen’s 'Vicky Cristina Barcelona.'",
-    coordinates: { latitude: 41.3857, longitude: 2.1733 },
-    address: "Carrer de Montsió, 3, 08002 Barcelona, Spain",
-    openingHours: "12:00 PM - 1:00 AM",
-    admissionFee: "€15-30 (average meal)",
-    bestTimeToVisit: "Lunch for history buffs",
-    durationOfVisit: "1-2 hours",
-    rating: "4.3/5, based on TripAdvisor reviews",
-    reservationLink: "https://4gats.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3857,2.1733"
+    "name": "Lasarte",
+    "category": "Dining",
+    "description": "Three-Michelin-star restaurant by Martín Berasategui, known for its elegant dishes and celebrity clientele.",
+    "coordinates": { "latitude": 41.3912, "longitude": 2.1505 },
+    "address": "Carrer de Mallorca, 259, 08008 Barcelona, Spain",
+    "openingHours": "1:00 PM - 3:00 PM, 8:00 PM - 10:00 PM (closed Sun-Mon)",
+    "admissionFee": "€230-280 (tasting menu)",
+    "bestTimeToVisit": "Evening for ambiance",
+    "durationOfVisit": "3-4 hours",
+    "rating": "4.8/5, based on Michelin Guide",
+    "reservationLink": "https://restaurantlasarte.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Lasarte,+Barcelona"
   },
   {
-    name: "Tickets",
-    category: "Dining",
-    description: "A playful tapas bar by the Adrià brothers, known for molecular gastronomy and a lively vibe.",
-    coordinates: { latitude: 41.3752, longitude: 2.1560 },
-    address: "Avinguda del Paral·lel, 164, 08015 Barcelona, Spain",
-    openingHours: "6:00 PM - 11:00 PM (closed Sun-Mon)",
-    admissionFee: "€50-80 (average meal)",
-    bestTimeToVisit: "Evening for the full experience",
-    durationOfVisit: "2-3 hours",
-    rating: "4.6/5, based on TheFork reviews",
-    reservationLink: "https://elbarriadria.com/en/tickets/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3752,2.1560"
+    "name": "Els Quatre Gats",
+    "category": "Dining",
+    "description": "A modernist café where Picasso held his first exhibition, featured in Woody Allen’s 'Vicky Cristina Barcelona.'",
+    "coordinates": { "latitude": 41.3857, "longitude": 2.1733 },
+    "address": "Carrer de Montsió, 3, 08002 Barcelona, Spain",
+    "openingHours": "12:00 PM - 1:00 AM",
+    "admissionFee": "€15-30 (average meal)",
+    "bestTimeToVisit": "Lunch for history buffs",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.3/5, based on TripAdvisor reviews",
+    "reservationLink": "https://4gats.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Els+Quatre+Gats,+Barcelona"
   },
   {
-    name: "Can Culleretes",
-    category: "Dining",
-    description: "Barcelona’s oldest restaurant (since 1786), serving classic Catalan dishes like escudella.",
-    coordinates: { latitude: 41.3818, longitude: 2.1738 },
-    address: "Carrer d’en Quintana, 5, 08002 Barcelona, Spain",
-    openingHours: "1:00 PM - 4:00 PM, 8:00 PM - 11:00 PM (closed Mon)",
-    admissionFee: "€20-35 (average meal)",
-    bestTimeToVisit: "Lunch for a traditional vibe",
-    durationOfVisit: "1-2 hours",
-    rating: "4.4/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3818,2.1738"
+    "name": "Tickets",
+    "category": "Dining",
+    "description": "A playful tapas bar by the Adrià brothers, known for molecular gastronomy and a lively vibe.",
+    "coordinates": { "latitude": 41.3752, "longitude": 2.1560 },
+    "address": "Avinguda del Paral·lel, 164, 08015 Barcelona, Spain",
+    "openingHours": "6:00 PM - 11:00 PM (closed Sun-Mon)",
+    "admissionFee": "€50-80 (average meal)",
+    "bestTimeToVisit": "Evening for the full experience",
+    "durationOfVisit": "2-3 hours",
+    "rating": "4.6/5, based on TheFork reviews",
+    "reservationLink": "https://elbarriadria.com/en/tickets/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Tickets,+Barcelona"
   },
   {
-    name: "La Cova Fumada",
-    category: "Dining",
-    description: "A legendary spot in Barceloneta, rumored to have invented the bomba (spicy potato croquette).",
-    coordinates: { latitude: 41.3795, longitude: 2.1892 },
-    address: "Carrer del Baluard, 56, 08003 Barcelona, Spain",
-    openingHours: "9:00 AM - 3:00 PM, 6:00 PM - 8:00 PM (closed Sun)",
-    admissionFee: "€15-25 (average meal)",
-    bestTimeToVisit: "Lunch for authenticity",
-    durationOfVisit: "1-2 hours",
-    rating: "4.5/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3795,2.1892"
+    "name": "Can Culleretes",
+    "category": "Dining",
+    "description": "Barcelona’s oldest restaurant (since 1786), serving classic Catalan dishes like escudella.",
+    "coordinates": { "latitude": 41.3818, "longitude": 2.1738 },
+    "address": "Carrer d’en Quintana, 5, 08002 Barcelona, Spain",
+    "openingHours": "1:00 PM - 4:00 PM, 8:00 PM - 11:00 PM (closed Mon)",
+    "admissionFee": "€20-35 (average meal)",
+    "bestTimeToVisit": "Lunch for a traditional vibe",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.4/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/Can+Culleretes,+Barcelona"
   },
   {
-    name: "Quimet & Quimet",
-    category: "Dining",
-    description: "A tiny, standing-room-only tapas bar famous for montaditos and vermouth.",
-    coordinates: { latitude: 41.3708, longitude: 2.1648 },
-    address: "Carrer del Poeta Cabanyes, 25, 08004 Barcelona, Spain",
-    openingHours: "12:00 PM - 4:00 PM, 7:00 PM - 10:30 PM (closed Sun)",
-    admissionFee: "€20-30 (average meal)",
-    bestTimeToVisit: "Afternoon for a quick bite",
-    durationOfVisit: "1 hour",
-    rating: "4.7/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3708,2.1648"
+    "name": "La Cova Fumada",
+    "category": "Dining",
+    "description": "A legendary spot in Barceloneta, rumored to have invented the bomba (spicy potato croquette).",
+    "coordinates": { "latitude": 41.3795, "longitude": 2.1892 },
+    "address": "Carrer del Baluard, 56, 08003 Barcelona, Spain",
+    "openingHours": "9:00 AM - 3:00 PM, 6:00 PM - 8:00 PM (closed Sun)",
+    "admissionFee": "€15-25 (average meal)",
+    "bestTimeToVisit": "Lunch for authenticity",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.5/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/La+Cova+Fumada,+Barcelona"
   },
   {
-    name: "Teatro Kitchen & Bar",
-    category: "Dining",
-    description: "One-Michelin-star restaurant with creative cuisine by Oliver Peña, known for its theatrical presentation.",
-    coordinates: { latitude: 41.3859, longitude: 2.1640 },
-    address: "Avinguda del Paral·lel, 164, 08015 Barcelona, Spain",
-    openingHours: "7:00 PM - 11:00 PM (closed Sun-Mon)",
-    admissionFee: "€150-200 (tasting menu)",
-    bestTimeToVisit: "Evening for the show",
-    durationOfVisit: "2-3 hours",
-    rating: "4.8/5, based on TheFork reviews",
-    reservationLink: "https://teatrobarcelona.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3859,2.1640"
+    "name": "Quimet & Quimet",
+    "category": "Dining",
+    "description": "A tiny, standing-room-only tapas bar famous for montaditos and vermouth.",
+    "coordinates": { "latitude": 41.3708, "longitude": 2.1648 },
+    "address": "Carrer del Poeta Cabanyes, 25, 08004 Barcelona, Spain",
+    "openingHours": "12:00 PM - 4:00 PM, 7:00 PM - 10:30 PM (closed Sun)",
+    "admissionFee": "€20-30 (average meal)",
+    "bestTimeToVisit": "Afternoon for a quick bite",
+    "durationOfVisit": "1 hour",
+    "rating": "4.7/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/Quimet+&+Quimet,+Barcelona"
   },
   {
-    name: "Cervecería Catalana",
-    category: "Dining",
-    description: "A bustling tapas spot loved by locals and tourists, featured in travel shows.",
-    coordinates: { latitude: 41.3920, longitude: 2.1608 },
-    address: "Carrer de Mallorca, 236, 08008 Barcelona, Spain",
-    openingHours: "9:00 AM - 1:30 AM",
-    admissionFee: "€20-35 (average meal)",
-    bestTimeToVisit: "Evening for the buzz",
-    durationOfVisit: "1-2 hours",
-    rating: "4.5/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3920,2.1608"
+    "name": "Teatro Kitchen & Bar",
+    "category": "Dining",
+    "description": "One-Michelin-star restaurant with creative cuisine by Oliver Peña, known for its theatrical presentation.",
+    "coordinates": { "latitude": 41.3859, "longitude": 2.1640 },
+    "address": "Avinguda del Paral·lel, 164, 08015 Barcelona, Spain",
+    "openingHours": "7:00 PM - 11:00 PM (closed Sun-Mon)",
+    "admissionFee": "€150-200 (tasting menu)",
+    "bestTimeToVisit": "Evening for the show",
+    "durationOfVisit": "2-3 hours",
+    "rating": "4.8/5, based on TheFork reviews",
+    "reservationLink": "https://teatrobarcelona.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Teatro+Kitchen+&+Bar,+Barcelona"
   },
   {
-    name: "Bar Cañete",
-    category: "Dining",
-    description: "A high-end tapas bar with a lively atmosphere, popular with food critics.",
-    coordinates: { latitude: 41.3800, longitude: 2.1715 },
-    address: "Carrer de la Unió, 17, 08001 Barcelona, Spain",
-    openingHours: "1:00 PM - 12:00 AM",
-    admissionFee: "€30-50 (average meal)",
-    bestTimeToVisit: "Evening for the energy",
-    durationOfVisit: "2 hours",
-    rating: "4.6/5, based on TheFork reviews",
-    reservationLink: "https://barcanete.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3800,2.1715"
+    "name": "Cervecería Catalana",
+    "category": "Dining",
+    "description": "A bustling tapas spot loved by locals and tourists, featured in travel shows.",
+    "coordinates": { "latitude": 41.3920, "longitude": 2.1608 },
+    "address": "Carrer de Mallorca, 236, 08008 Barcelona, Spain",
+    "openingHours": "9:00 AM - 1:30 AM",
+    "admissionFee": "€20-35 (average meal)",
+    "bestTimeToVisit": "Evening for the buzz",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.5/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/Cervecería+Catalana,+Barcelona"
   },
   {
-    name: "Koy Shunka",
-    category: "Dining",
-    description: "One-Michelin-star Japanese restaurant, a favorite of Ferran Adrià.",
-    coordinates: { latitude: 41.3850, longitude: 2.1740 },
-    address: "Carrer d’en Copons, 7, 08002 Barcelona, Spain",
-    openingHours: "1:30 PM - 3:30 PM, 8:30 PM - 11:00 PM (closed Mon)",
-    admissionFee: "€100-150 (average meal)",
-    bestTimeToVisit: "Evening for sushi lovers",
-    durationOfVisit: "2-3 hours",
-    rating: "4.7/5, based on Michelin reviews",
-    reservationLink: "https://koyshunka.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3850,2.1740"
+    "name": "Bar Cañete",
+    "category": "Dining",
+    "description": "A high-end tapas bar with a lively atmosphere, popular with food critics.",
+    "coordinates": { "latitude": 41.3800, "longitude": 2.1715 },
+    "address": "Carrer de la Unió, 17, 08001 Barcelona, Spain",
+    "openingHours": "1:00 PM - 12:00 AM",
+    "admissionFee": "€30-50 (average meal)",
+    "bestTimeToVisit": "Evening for the energy",
+    "durationOfVisit": "2 hours",
+    "rating": "4.6/5, based on TheFork reviews",
+    "reservationLink": "https://barcanete.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Bar+Cañete,+Barcelona"
   },
   {
-    name: "Suculent",
-    category: "Dining",
-    description: "A chef-favorite spot blending Catalan comfort food with global influences.",
-    coordinates: { latitude: 41.3785, longitude: 2.1650 },
-    address: "Rambla del Raval, 43, 08001 Barcelona, Spain",
-    openingHours: "1:00 PM - 4:00 PM, 7:00 PM - 11:00 PM",
-    admissionFee: "€40-60 (average meal)",
-    bestTimeToVisit: "Evening for a relaxed meal",
-    durationOfVisit: "2 hours",
-    rating: "4.6/5, based on TripAdvisor reviews",
-    reservationLink: "https://suculent.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3785,2.1650"
+    "name": "Koy Shunka",
+    "category": "Dining",
+    "description": "One-Michelin-star Japanese restaurant, a favorite of Ferran Adrià.",
+    "coordinates": { "latitude": 41.3850, "longitude": 2.1740 },
+    "address": "Carrer d’en Copons, 7, 08002 Barcelona, Spain",
+    "openingHours": "1:30 PM - 3:30 PM, 8:30 PM - 11:00 PM (closed Mon)",
+    "admissionFee": "€100-150 (average meal)",
+    "bestTimeToVisit": "Evening for sushi lovers",
+    "durationOfVisit": "2-3 hours",
+    "rating": "4.7/5, based on Michelin reviews",
+    "reservationLink": "https://koyshunka.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Koy+Shunka,+Barcelona"
   },
   {
-    name: "Gresca",
-    category: "Dining",
-    description: "A chef-driven spot with seasonal Catalan dishes, loved for its nose-to-tail approach.",
-    coordinates: { latitude: 41.3950, longitude: 2.1560 },
-    address: "Carrer de Provença, 230, 08036 Barcelona, Spain",
-    openingHours: "1:00 PM - 3:30 PM, 8:00 PM - 11:00 PM (closed Sun)",
-    admissionFee: "€50-70 (average meal)",
-    bestTimeToVisit: "Lunch for a quieter visit",
-    durationOfVisit: "2 hours",
-    rating: "4.7/5, based on TheFork reviews",
-    reservationLink: "https://gresca.net/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3950,2.1560"
+    "name": "Suculent",
+    "category": "Dining",
+    "description": "A chef-favorite spot blending Catalan comfort food with global influences.",
+    "coordinates": { "latitude": 41.3785, "longitude": 2.1650 },
+    "address": "Rambla del Raval, 43, 08001 Barcelona, Spain",
+    "openingHours": "1:00 PM - 4:00 PM, 7:00 PM - 11:00 PM",
+    "admissionFee": "€40-60 (average meal)",
+    "bestTimeToVisit": "Evening for a relaxed meal",
+    "durationOfVisit": "2 hours",
+    "rating": "4.6/5, based on TripAdvisor reviews",
+    "reservationLink": "https://suculent.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Suculent,+Barcelona"
+  },
+  {
+    "name": "Gresca",
+    "category": "Dining",
+    "description": "A chef-driven spot with seasonal Catalan dishes, loved for its nose-to-tail approach.",
+    "coordinates": { "latitude": 41.3950, "longitude": 2.1560 },
+    "address": "Carrer de Provença, 230, 08036 Barcelona, Spain",
+    "openingHours": "1:00 PM - 3:30 PM, 8:00 PM - 11:00 PM (closed Sun)",
+    "admissionFee": "€50-70 (average meal)",
+    "bestTimeToVisit": "Lunch for a quieter visit",
+    "durationOfVisit": "2 hours",
+    "rating": "4.7/5, based on TheFork reviews",
+    "reservationLink": "https://gresca.net/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Gresca,+Barcelona"
+  },
+  {
+    "name": "Paradiso",
+    "category": "Bars and Pubs",
+    "description": "A speakeasy-style bar ranked among the world’s best, hidden behind a pastrami shop.",
+    "coordinates": { "latitude": 41.3830, "longitude": 2.1790 },
+    "address": "Carrer de Rera Palau, 4, 08003 Barcelona, Spain",
+    "openingHours": "7:00 PM - 2:00 AM",
+    "admissionFee": "€12-15 (average drink)",
+    "bestTimeToVisit": "Evening for cocktails",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.8/5, based on TripAdvisor reviews",
+    "reservationLink": "https://paradiso.cat/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Paradiso,+Barcelona"
+  },
+  {
+    "name": "Dry Martini",
+    "category": "Bars and Pubs",
+    "description": "A classic martini bar frequented by celebrities like Javier Bardem, featured in films.",
+    "coordinates": { "latitude": 41.3935, "longitude": 2.1530 },
+    "address": "Carrer d’Aribau, 162-166, 08036 Barcelona, Spain",
+    "openingHours": "5:00 PM - 2:00 AM",
+    "admissionFee": "€15-20 (average drink)",
+    "bestTimeToVisit": "Evening for sophistication",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.6/5, based on TheFork reviews",
+    "reservationLink": "https://drymartiniorg.com/en/reservations",
+    "googleMapsLink": "https://www.google.com/maps/place/Dry+Martini,+Barcelona"
+  },
+  {
+    "name": "Boadas Cocktails",
+    "category": "Bars and Pubs",
+    "description": "Barcelona’s oldest cocktail bar (since 1933), a haunt of Ernest Hemingway.",
+    "coordinates": { "latitude": 41.3840, "longitude": 2.1700 },
+    "address": "Carrer dels Tallers, 1, 08001 Barcelona, Spain",
+    "openingHours": "12:00 PM - 2:00 AM",
+    "admissionFee": "€10-15 (average drink)",
+    "bestTimeToVisit": "Afternoon for history",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.5/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/Boadas+Cocktails,+Barcelona"
+  },
+  {
+    "name": "El Born Bar",
+    "category": "Bars and Pubs",
+    "description": "A cozy pub in El Born, popular with locals and expats for its laid-back vibe.",
+    "coordinates": { "latitude": 41.3855, "longitude": 2.1830 },
+    "address": "Passeig del Born, 27, 08003 Barcelona, Spain",
+    "openingHours": "5:00 PM - 2:00 AM",
+    "admissionFee": "€5-10 (average drink)",
+    "bestTimeToVisit": "Evening for a chill night",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.4/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/El+Born+Bar,+Barcelona"
+  },
+  {
+    "name": "Bar Marsella",
+    "category": "Bars and Pubs",
+    "description": "A 19th-century absinthe bar, visited by Picasso and featured in 'Vicky Cristina Barcelona.'",
+    "coordinates": { "latitude": 41.3780, "longitude": 2.1710 },
+    "address": "Carrer de Sant Pau, 65, 08001 Barcelona, Spain",
+    "openingHours": "10:00 PM - 2:30 AM (closed Sun)",
+    "admissionFee": "€5-10 (average drink)",
+    "bestTimeToVisit": "Late night for ambiance",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.3/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/Bar+Marsella,+Barcelona"
+  },
+  {
+    "name": "Varmuteo",
+    "category": "Bars and Pubs",
+    "description": "A trendy vermouth spot by the Alapar team, known for its casual vibe and small bites.",
+    "coordinates": { "latitude": 41.3850, "longitude": 2.1500 },
+    "address": "Carrer de Vilamarí, 2, 08015 Barcelona, Spain",
+    "openingHours": "12:00 PM - 12:00 AM",
+    "admissionFee": "€8-12 (average drink)",
+    "bestTimeToVisit": "Afternoon for vermouth",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.6/5, based on TheFork reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/Varmuteo,+Barcelona"
+  },
+  {
+    "name": "La Confitería",
+    "category": "Bars and Pubs",
+    "description": "A former candy shop turned stylish bar, popular with the artsy crowd.",
+    "coordinates": { "latitude": 41.3785, "longitude": 2.1660 },
+    "address": "Carrer de Sant Pau, 128, 08001 Barcelona, Spain",
+    "openingHours": "6:00 PM - 2:00 AM",
+    "admissionFee": "€10-15 (average drink)",
+    "bestTimeToVisit": "Evening for atmosphere",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.5/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/La+Confitería,+Barcelona"
+  },
+  {
+    "name": "Creps al Born",
+    "category": "Bars and Pubs",
+    "description": "A quirky bar with crepes and cocktails, a hidden gem in El Born.",
+    "coordinates": { "latitude": 41.3845, "longitude": 2.1825 },
+    "address": "Carrer de la Princesa, 1, 08003 Barcelona, Spain",
+    "openingHours": "6:00 PM - 2:00 AM",
+    "admissionFee": "€8-12 (average drink)",
+    "bestTimeToVisit": "Evening for a unique vibe",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.4/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/Creps+al+Born,+Barcelona"
+  },
+  {
+    "name": "Balius Bar",
+    "category": "Bars and Pubs",
+    "description": "A Poblenou favorite with live music and inventive cocktails.",
+    "coordinates": { "latitude": 41.3990, "longitude": 2.2030 },
+    "address": "Carrer de Pujades, 196, 08005 Barcelona, Spain",
+    "openingHours": "6:00 PM - 2:00 AM",
+    "admissionFee": "€10-15 (average drink)",
+    "bestTimeToVisit": "Evening for live music",
+    "durationOfVisit": "1-2 hours",
+    "rating": "4.5/5, based on TheFork reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/Balius+Bar,+Barcelona"
+  },
+  {
+    "name": "El Xampanyet",
+    "category": "Bars and Pubs",
+    "description": "A historic cava bar in El Born, loved for its rustic charm and cheap drinks.",
+    "coordinates": { "latitude": 41.3850, "longitude": 2.1835 },
+    "address": "Carrer de Montcada, 22, 08003 Barcelona, Spain",
+    "openingHours": "12:00 PM - 3:30 PM, 7:00 PM - 11:00 PM (closed Mon)",
+    "admissionFee": "€5-10 (average drink)",
+    "bestTimeToVisit": "Afternoon for cava",
+    "durationOfVisit": "1 hour",
+    "rating": "4.6/5, based on TripAdvisor reviews",
+    "reservationLink": "N/A",
+    "googleMapsLink": "https://www.google.com/maps/place/El+Xampanyet,+Barcelona"
   },
 
-  {
-    name: "Paradiso",
-    category: "Bars and Pubs",
-    description: "A speakeasy-style bar ranked among the world’s best, hidden behind a pastrami shop.",
-    coordinates: { latitude: 41.3830, longitude: 2.1790 },
-    address: "Carrer de Rera Palau, 4, 08003 Barcelona, Spain",
-    openingHours: "7:00 PM - 2:00 AM",
-    admissionFee: "€12-15 (average drink)",
-    bestTimeToVisit: "Evening for cocktails",
-    durationOfVisit: "1-2 hours",
-    rating: "4.8/5, based on TripAdvisor reviews",
-    reservationLink: "https://paradiso.cat/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3830,2.1790"
-  },
-  {
-    name: "Dry Martini",
-    category: "Bars and Pubs",
-    description: "A classic martini bar frequented by celebrities like Javier Bardem, featured in films.",
-    coordinates: { latitude: 41.3935, longitude: 2.1530 },
-    address: "Carrer d’Aribau, 162-166, 08036 Barcelona, Spain",
-    openingHours: "5:00 PM - 2:00 AM",
-    admissionFee: "€15-20 (average drink)",
-    bestTimeToVisit: "Evening for sophistication",
-    durationOfVisit: "1-2 hours",
-    rating: "4.6/5, based on TheFork reviews",
-    reservationLink: "https://drymartiniorg.com/en/reservations",
-    googleMapsLink: "https://maps.google.com/?q=41.3935,2.1530"
-  },
-  {
-    name: "Boadas Cocktails",
-    category: "Bars and Pubs",
-    description: "Barcelona’s oldest cocktail bar (since 1933), a haunt of Ernest Hemingway.",
-    coordinates: { latitude: 41.3840, longitude: 2.1700 },
-    address: "Carrer dels Tallers, 1, 08001 Barcelona, Spain",
-    openingHours: "12:00 PM - 2:00 AM",
-    admissionFee: "€10-15 (average drink)",
-    bestTimeToVisit: "Afternoon for history",
-    durationOfVisit: "1-2 hours",
-    rating: "4.5/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3840,2.1700"
-  },
-  {
-    name: "El Born Bar",
-    category: "Bars and Pubs",
-    description: "A cozy pub in El Born, popular with locals and expats for its laid-back vibe.",
-    coordinates: { latitude: 41.3855, longitude: 2.1830 },
-    address: "Passeig del Born, 27, 08003 Barcelona, Spain",
-    openingHours: "5:00 PM - 2:00 AM",
-    admissionFee: "€5-10 (average drink)",
-    bestTimeToVisit: "Evening for a chill night",
-    durationOfVisit: "1-2 hours",
-    rating: "4.4/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3855,2.1830"
-  },
-  {
-    name: "Bar Marsella",
-    category: "Bars and Pubs",
-    description: "A 19th-century absinthe bar, visited by Picasso and featured in 'Vicky Cristina Barcelona.'",
-    coordinates: { latitude: 41.3780, longitude: 2.1710 },
-    address: "Carrer de Sant Pau, 65, 08001 Barcelona, Spain",
-    openingHours: "10:00 PM - 2:30 AM (closed Sun)",
-    admissionFee: "€5-10 (average drink)",
-    bestTimeToVisit: "Late night for ambiance",
-    durationOfVisit: "1-2 hours",
-    rating: "4.3/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3780,2.1710"
-  },
-  {
-    name: "Varmuteo",
-    category: "Bars and Pubs",
-    description: "A trendy vermouth spot by the Alapar team, known for its casual vibe and small bites.",
-    coordinates: { latitude: 41.3850, longitude: 2.1500 },
-    address: "Carrer de Vilamarí, 2, 08015 Barcelona, Spain",
-    openingHours: "12:00 PM - 12:00 AM",
-    admissionFee: "€8-12 (average drink)",
-    bestTimeToVisit: "Afternoon for vermouth",
-    durationOfVisit: "1-2 hours",
-    rating: "4.6/5, based on TheFork reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3850,2.1500"
-  },
-  {
-    name: "La Confitería",
-    category: "Bars and Pubs",
-    description: "A former candy shop turned stylish bar, popular with the artsy crowd.",
-    coordinates: { latitude: 41.3785, longitude: 2.1660 },
-    address: "Carrer de Sant Pau, 128, 08001 Barcelona, Spain",
-    openingHours: "6:00 PM - 2:00 AM",
-    admissionFee: "€10-15 (average drink)",
-    bestTimeToVisit: "Evening for atmosphere",
-    durationOfVisit: "1-2 hours",
-    rating: "4.5/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3785,2.1660"
-  },
-  {
-    name: "Creps al Born",
-    category: "Bars and Pubs",
-    description: "A quirky bar with crepes and cocktails, a hidden gem in El Born.",
-    coordinates: { latitude: 41.3845, longitude: 2.1825 },
-    address: "Carrer de la Princesa, 1, 08003 Barcelona, Spain",
-    openingHours: "6:00 PM - 2:00 AM",
-    admissionFee: "€8-12 (average drink)",
-    bestTimeToVisit: "Evening for a unique vibe",
-    durationOfVisit: "1-2 hours",
-    rating: "4.4/5, based on TripAdvisor reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3845,2.1825"
-  },
-  {
-    name: "Balius Bar",
-    category: "Bars and Pubs",
-    description: "A Poblenou favorite with live music and inventive cocktails.",
-    coordinates: { latitude: 41.3990, longitude: 2.2030 },
-    address: "Carrer de Pujades, 196, 08005 Barcelona, Spain",
-    openingHours: "6:00 PM - 2:00 AM",
-    admissionFee: "€10-15 (average drink)",
-    bestTimeToVisit: "Evening for live music",
-    durationOfVisit: "1-2 hours",
-    rating: "4.5/5, based on TheFork reviews",
-    reservationLink: "N/A",
-    googleMapsLink: "https://maps.google.com/?q=41.3990,2.2030"
-  },
   {
     name: "El Xampanyet",
     category: "Bars and Pubs",
@@ -1506,7 +1463,7 @@
     googleMapsLink: "https://maps.google.com/?q=41.3995,2.1665"
   },
         ];
-        
+       
         // Store markers for each location and active filters state
         const markers = [];
         const activeFilters = {};
@@ -1524,7 +1481,7 @@
             const markerIcon = L.divIcon({
                 html: `<div style="background-color: ${config.color}; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px;">${config.icon}</div>`,
                 className: '',
-                iconSize: [20, 20]
+                iconSize: [30, 30]
             });
             
             const marker = L.marker([attraction.coordinates.latitude, attraction.coordinates.longitude], { 
@@ -1771,8 +1728,26 @@
             }
         });
         
-        // Make the filter panel draggable
+        // Toggle filter panel visibility
         const filterPanel = document.getElementById('filter-panel');
+        const filterToggleBtn = document.getElementById('filter-toggle-btn');
+        let isPanelVisible = true;
+        
+        filterToggleBtn.addEventListener('click', function() {
+            isPanelVisible = !isPanelVisible;
+            
+            if (isPanelVisible) {
+                filterPanel.classList.remove('hidden');
+                filterToggleBtn.innerHTML = '🔍';
+                filterToggleBtn.title = 'Hide Filter Panel';
+            } else {
+                filterPanel.classList.add('hidden');
+                filterToggleBtn.innerHTML = '⚙️';
+                filterToggleBtn.title = 'Show Filter Panel';
+            }
+        });
+        
+        // Make the filter panel draggable
         let isDragging = false;
         let offsetX, offsetY;
         
